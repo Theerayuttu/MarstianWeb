@@ -59,13 +59,13 @@ const MainMap = ({ filteredPositions, selectedPosition, onEventsClick }) => {
       {!features.disableEvents && (
         <MapNotification enabled={eventsAvailable} onClick={onEventsClick} />
       )}
-      {desktop && (
+      {/* {desktop && (
         <MapPadding
           start={
             parseInt(theme.dimensions.drawerWidthDesktop, 10) + parseInt(theme.spacing(1.5), 10)
           }
         />
-      )}
+      )} */}
     </>
   );
 };

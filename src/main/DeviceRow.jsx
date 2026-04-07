@@ -34,6 +34,8 @@ import { useAttributePreference } from '../common/util/preferences';
 import GeofencesValue from '../common/components/GeofencesValue';
 import DriverValue from '../common/components/DriverValue';
 import MotionBar from './components/MotionBar';
+import GppMaybeIcon from '@mui/icons-material/GppMaybe';
+import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 
 dayjs.extend(relativeTime);
 
@@ -70,14 +72,20 @@ const DeviceRow = ({ devices, index, style }) => {
   const dispatch = useDispatch();
   const t = useTranslation();
 
+  const server = useSelector((state) => state.session.server);
   const admin = useAdministrator();
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
 
   const item = devices[index];
   const position = useSelector((state) => state.session.positions[item.id]);
 
+  const events = useSelector((state) => state.events.items.filter((e) =>  e.deviceId === item.id));
+  const eventid = events[0];
+
   const devicePrimary = useAttributePreference('devicePrimary', 'name');
   const deviceSecondary = useAttributePreference('deviceSecondary', '');
+
+  const serverDaysoffline = server?.attributes?.daysoffline;
 
   const resolveFieldValue = (field) => {
     if (field === 'geofenceIds') {
@@ -117,6 +125,42 @@ const DeviceRow = ({ devices, index, style }) => {
     );
   };
 
+  function daysfromNow(xDate) {
+    const currentDate = new Date();
+    const pastDate = new Date(xDate);
+    const timeDifference = currentDate - pastDate;
+    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    return daysDifference; // Return  number of days
+  };
+
+  const getStatusColorIcon = (item) => {
+    switch (item.status) {
+      case 'online':
+      case 'unknown':
+        if (daysfromNow(item.lastUpdate) >= serverDaysoffline) {
+          return 'red';
+        } else {
+          return 'green';
+        }
+      case 'offline':
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
+  const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "online":
+        return "success";
+      case "offline":
+        return "error";
+      case "unknown":
+        return "neutral";
+      default:
+        return "neutral";
+    }
+  };
+
   return (
     <div style={style}>
       <ListItemButton
@@ -127,7 +171,7 @@ const DeviceRow = ({ devices, index, style }) => {
         className={selectedDeviceId === item.id ? classes.selected : null}
       >
         <ListItemAvatar>
-          <Avatar>
+          <Avatar style={{ background: getStatusColorIcon(item) }} >
             <img className={classes.icon} src={mapIcons[mapIconKey(item.category)]} alt="" />
           </Avatar>
         </ListItemAvatar>
@@ -152,41 +196,33 @@ const DeviceRow = ({ devices, index, style }) => {
                 </IconButton>
               </Tooltip>
             )}
+            {/**Add Events Maintenance */}
+            {eventid &&  (
+              <>
+                { (eventid.hasOwnProperty('type') && eventid.type === "maintenance" && eventid.deviceId === item.id) && (
+                  <Tooltip title={`${eventid.attributes.message}`}>
+                    <IconButton size="small">
+                      <BuildCircleIcon fontSize="medium" className={classes.warning} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </>
+            )}
             {position.attributes.hasOwnProperty('ignition') && (
-              <Tooltip
-                title={`${t('positionIgnition')}: ${formatBoolean(position.attributes.ignition, t)}`}
-              >
+              <Tooltip title={position.attributes.output === 1 ? (t('commandEngineStop')) : (`${t('positionIgnition')}: ${formatBoolean(position.attributes.ignition, t)}`)}>
                 <IconButton size="small">
                   {position.attributes.ignition ? (
-                    <EngineIcon width={20} height={20} className={classes.success} />
+                    <EngineIcon width={25} height={25} className={position.attributes.output === 1 ? classes.error : classes.success} />
                   ) : (
-                    <EngineIcon width={20} height={20} className={classes.neutral} />
+                    <EngineIcon width={20} height={20} className={position.attributes.output === 1 ? classes.error : classes.neutral} />
                   )}
                 </IconButton>
               </Tooltip>
             )}
-            {position.attributes.hasOwnProperty('batteryLevel') && (
-              <Tooltip
-                title={`${t('positionBatteryLevel')}: ${formatPercentage(position.attributes.batteryLevel)}`}
-              >
+            {position.attributes.hasOwnProperty('ignition') && position.attributes.output === 1 && position.attributes.ignition && (
+              <Tooltip title={`${t('alarmViolation')}`}>
                 <IconButton size="small">
-                  {(position.attributes.batteryLevel > 70 &&
-                    (position.attributes.charge ? (
-                      <BatteryChargingFullIcon fontSize="small" className={classes.success} />
-                    ) : (
-                      <BatteryFullIcon fontSize="small" className={classes.success} />
-                    ))) ||
-                    (position.attributes.batteryLevel > 30 &&
-                      (position.attributes.charge ? (
-                        <BatteryCharging60Icon fontSize="small" className={classes.warning} />
-                      ) : (
-                        <Battery60Icon fontSize="small" className={classes.warning} />
-                      ))) ||
-                    (position.attributes.charge ? (
-                      <BatteryCharging20Icon fontSize="small" className={classes.error} />
-                    ) : (
-                      <Battery20Icon fontSize="small" className={classes.error} />
-                    ))}
+                  <GppMaybeIcon fontSize="small" className={classes.error} />
                 </IconButton>
               </Tooltip>
             )}

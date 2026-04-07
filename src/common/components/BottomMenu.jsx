@@ -10,10 +10,14 @@ import {
   Typography,
   Badge,
 } from '@mui/material';
+import { makeStyles } from 'tss-react/mui';
+import { layoutPalette } from '../theme/layoutTokens';
 
+import AssessmentRounded from '@mui/icons-material/AssessmentRounded';
 import DescriptionIcon from '@mui/icons-material/Description';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MapIcon from '@mui/icons-material/Map';
+import ExploreIcon from '@mui/icons-material/Explore';
 import PersonIcon from '@mui/icons-material/Person';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
@@ -21,6 +25,26 @@ import { sessionActions } from '../../store';
 import { useTranslation } from './LocalizationProvider';
 import { useRestriction } from '../util/permissions';
 import { nativePostMessage } from './NativeInterface';
+
+const useStyles = makeStyles()(() => ({
+  bar: {
+    background: layoutPalette.sidebarGradient,
+    color: layoutPalette.sidebarTextPrimary,
+    borderRadius: 0,
+  },
+  navigation: {
+    background: 'transparent',
+    '& .MuiBottomNavigationAction-root': {
+      color: layoutPalette.bottomNavText,
+      '&.Mui-selected': {
+        color: layoutPalette.accentContrast,
+      },
+    },
+    '& .MuiSvgIcon-root': {
+      fontSize: '1.35rem',
+    },
+  },
+}));
 
 const BottomMenu = () => {
   const navigate = useNavigate();
@@ -36,6 +60,7 @@ const BottomMenu = () => {
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const { classes } = useStyles();
 
   const currentSelection = () => {
     if (location.pathname === `/settings/user/${user.id}`) {
@@ -126,13 +151,18 @@ const BottomMenu = () => {
   };
 
   return (
-    <Paper square elevation={3}>
-      <BottomNavigation value={currentSelection()} onChange={handleSelection} showLabels>
+    <Paper square elevation={6} className={classes.bar}>
+      <BottomNavigation
+        value={currentSelection()}
+        onChange={handleSelection}
+        showLabels
+        className={classes.navigation}
+      >
         <BottomNavigationAction
           label={t('mapTitle')}
           icon={
             <Badge color="error" variant="dot" overlap="circular" invisible={socket !== false}>
-              <MapIcon />
+              <ExploreIcon />
             </Badge>
           }
           value="map"
@@ -140,7 +170,7 @@ const BottomMenu = () => {
         {!disableReports && (
           <BottomNavigationAction
             label={t('reportTitle')}
-            icon={<DescriptionIcon />}
+            icon={<AssessmentRounded />}
             value="reports"
           />
         )}

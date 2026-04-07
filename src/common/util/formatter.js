@@ -23,20 +23,20 @@ export const formatBoolean = (value, t) => (value ? t('sharedYes') : t('sharedNo
 
 export const formatNumber = (value, precision = 1) => Number(value.toFixed(precision));
 
-export const formatPercentage = (value) => `${value}%`;
+export const formatPercentage = (value) => `${value.toFixed(0)}%`;
 
 export const formatTemperature = (value) => `${value.toFixed(1)}°C`;
 
-export const formatVoltage = (value, t) => `${value.toFixed(2)} ${t('sharedVoltAbbreviation')}`;
+export const formatVoltage = (value, t) => `${value.toFixed(1)} ${t('sharedVoltAbbreviation')}`;
 
 export const formatConsumption = (value, t) =>
-  `${value.toFixed(2)} ${t('sharedLiterPerHourAbbreviation')}`;
+  `${value.toFixed(1)} ${t('sharedLiterPerHourAbbreviation')}`;
 
 export const formatTime = (value, format) => {
   if (value) {
     const d = dayjs(value).toDate();
     const dateConfig = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    const minuteConfig = { hour: '2-digit', minute: '2-digit' };
+    const minuteConfig = { hour: '2-digit', minute: '2-digit', hour12: false };
     const secondConfig = { ...minuteConfig, second: '2-digit' };
     switch (format) {
       case 'date':
@@ -83,21 +83,31 @@ export const formatCourse = (value) => {
 };
 
 export const formatDistance = (value, unit, t) =>
-  `${distanceFromMeters(value, unit).toFixed(2)} ${distanceUnitString(unit, t)}`;
+  `${distanceFromMeters(value, unit).toFixed(1)} ${distanceUnitString(unit, t)}`;
 
 export const formatAltitude = (value, unit, t) =>
   `${altitudeFromMeters(value, unit).toFixed(2)} ${altitudeUnitString(unit, t)}`;
 
 export const formatSpeed = (value, unit, t) =>
-  `${speedFromKnots(value, unit).toFixed(2)} ${speedUnitString(unit, t)}`;
+  `${speedFromKnots(value, unit).toFixed(0)} ${speedUnitString(unit, t)}`;
 
 export const formatVolume = (value, unit, t) =>
-  `${volumeFromLiters(value, unit).toFixed(2)} ${volumeUnitString(unit, t)}`;
+  `${volumeFromLiters(value, unit).toFixed(1)} ${volumeUnitString(unit, t)}`;
 
-export const formatNumericHours = (value, t) => {
+export const formatNumericHours = (value, t, hformat) => {
   const hours = Math.floor(value / 3600000);
   const minutes = Math.floor((value % 3600000) / 60000);
-  return `${hours} ${t('sharedHourAbbreviation')} ${minutes} ${t('sharedMinuteAbbreviation')}`;
+  
+  switch (hformat) {
+    case 'h':
+      return `${(value / 3600000).toFixed(2)}`;
+    case 'h:m':
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    default:
+      return `${hours} ${t('sharedHourAbbreviation')} ${minutes} ${t('sharedMinuteAbbreviation')}`;
+  }
+
+  
 };
 
 export const formatCoordinate = (key, value, unit) => {

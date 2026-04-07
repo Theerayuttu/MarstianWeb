@@ -14,6 +14,7 @@ import { useCatch } from '../reactHelper';
 import useReportStyles from './common/useReportStyles';
 import TableShimmer from '../common/components/TableShimmer';
 import fetchOrThrow from '../common/util/fetchOrThrow';
+import exportExcel from '../common/util/exportExcel';
 import SelectField from '../common/components/SelectField';
 import exportExcel from '../common/util/exportExcel';
 import { deviceEquality } from '../common/util/deviceEquality';
@@ -92,6 +93,23 @@ const GeofenceReportPage = () => {
     }
   };
 
+  const onExport = useCatch(async () => {
+    const sheets = new Map();
+    items.forEach((item) => {
+      const deviceName = devices[item.deviceId]?.name || item.deviceId;
+      if (!sheets.has(deviceName)) {
+        sheets.set(deviceName, []);
+      }
+      const row = {};
+      columns.forEach((key) => {
+        const header = t(columnsMap.get(key));
+        row[header] = formatValue(item, key);
+      });
+      sheets.get(deviceName).push(row);
+    });
+    await exportExcel(t('sharedGeofences'), 'geofences.xlsx', sheets, theme);
+  });
+
   return (
     <PageLayout menu={<ReportsMenu />} breadcrumbs={['reportTitle', 'sharedGeofences']}>
       <div className={classes.header}>
@@ -112,7 +130,7 @@ const GeofenceReportPage = () => {
           <ColumnSelect columns={columns} setColumns={setColumns} columnsArray={columnsArray} />
         </ReportFilter>
       </div>
-      <Table>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell>{t('sharedDevice')}</TableCell>

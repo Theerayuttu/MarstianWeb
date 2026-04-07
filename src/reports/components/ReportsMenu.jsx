@@ -1,4 +1,4 @@
-import { Divider, List } from '@mui/material';
+import { Divider, List, ListItemButton, ListItemIcon, ListItemText, Box } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled';
@@ -12,14 +12,56 @@ import RouteIcon from '@mui/icons-material/Route';
 import EventRepeatIcon from '@mui/icons-material/EventRepeat';
 import NotesIcon from '@mui/icons-material/Notes';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from '../../common/components/LocalizationProvider';
 import { useAdministrator, useRestriction } from '../../common/util/permissions';
-import MenuItem from '../../common/components/MenuItem';
+import { makeStyles } from 'tss-react/mui';
+import { layoutPalette } from '../../common/theme/layoutTokens';
+
+const useStyles = makeStyles()((theme) => ({
+  sidebar: {
+    background: layoutPalette.sidebarGradient,
+    color: layoutPalette.sidebarTextPrimary,
+    padding: theme.spacing(3, 2),
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+    minHeight: '100%',
+  },
+  navList: {
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(0.75),
+  },
+  navItem: {
+    borderRadius: 14,
+    padding: theme.spacing(1.2, 1.75),
+    color: layoutPalette.sidebarTextMuted,
+    transition: 'all 180ms ease',
+    '& .MuiListItemIcon-root': {
+      minWidth: 38,
+      color: 'inherit',
+    },
+    '& .MuiListItemText-primary': {
+      fontWeight: 600,
+    },
+  },
+  navItemActive: {
+    backgroundColor: layoutPalette.navItemActiveBackground,
+    color: layoutPalette.accentContrast,
+    boxShadow: layoutPalette.navItemActiveShadow,
+    border: layoutPalette.navItemActiveBorder,
+  },
+  divider: {
+    borderColor: layoutPalette.dividerSoft,
+  },
+}));
 
 const ReportsMenu = () => {
   const t = useTranslation();
   const location = useLocation();
+  const { classes, cx } = useStyles();
 
   const admin = useAdministrator();
   const readonly = useRestriction('readonly');
@@ -45,93 +87,58 @@ const ReportsMenu = () => {
     return search ? `${path}?${search}` : path;
   };
 
+  const primaryItems = [
+    { title: t('reportCombined'), link: buildLink('/reports/combined'), icon: <StarIcon /> },
+    { title: t('reportPositions'), link: buildLink('/reports/route'), icon: <TimelineIcon /> },
+    { title: t('reportEvents'), link: buildLink('/reports/events'), icon: <NotificationsActiveIcon /> },
+    { title: t('sharedGeofences'), link: buildLink('/reports/geofences'), icon: <PlaceIcon /> },
+    { title: t('reportTrips'), link: buildLink('/reports/trips'), icon: <PlayCircleFilledIcon /> },
+    { title: t('reportStops'), link: buildLink('/reports/stops'), icon: <PauseCircleFilledIcon /> },
+    { title: t('reportSummary'), link: buildLink('/reports/summary'), icon: <FormatListBulletedIcon /> },
+    { title: t('reportChart'), link: buildLink('/reports/chart'), icon: <TrendingUpIcon /> },
+    { title: t('reportReplay'), link: buildLink('/replay'), icon: <RouteIcon /> },
+  ];
+
+  const secondaryItems = [
+    { title: t('sharedLogs'), link: '/reports/logs', icon: <NotesIcon /> },
+    !readonly && {
+      title: t('reportScheduled'),
+      link: '/reports/scheduled',
+      icon: <EventRepeatIcon />,
+    },
+    admin && {
+      title: t('statisticsTitle'),
+      link: '/reports/statistics',
+      icon: <BarChartIcon />,
+    },
+    admin && { title: t('reportAudit'), link: '/reports/audit', icon: <VerifiedUserIcon /> },
+  ].filter(Boolean);
+
+  const renderList = (items) => (
+    <List className={classes.navList} disablePadding>
+      {items.map((item) => {
+        const selected = location.pathname === item.link;
+        return (
+          <ListItemButton
+            key={item.link}
+            component={Link}
+            to={item.link}
+            className={cx(classes.navItem, { [classes.navItemActive]: selected })}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.title} />
+          </ListItemButton>
+        );
+      })}
+    </List>
+  );
+
   return (
-    <>
-      <List>
-        <MenuItem
-          title={t('reportCombined')}
-          link={buildLink('/reports/combined')}
-          icon={<StarIcon />}
-          selected={location.pathname === '/reports/combined'}
-        />
-        <MenuItem
-          title={t('reportEvents')}
-          link={buildLink('/reports/events')}
-          icon={<NotificationsActiveIcon />}
-          selected={location.pathname === '/reports/events'}
-        />
-        <MenuItem
-          title={t('sharedGeofences')}
-          link={buildLink('/reports/geofences')}
-          icon={<PlaceIcon />}
-          selected={location.pathname === '/reports/geofences'}
-        />
-        <MenuItem
-          title={t('reportTrips')}
-          link={buildLink('/reports/trips')}
-          icon={<PlayCircleFilledIcon />}
-          selected={location.pathname === '/reports/trips'}
-        />
-        <MenuItem
-          title={t('reportStops')}
-          link={buildLink('/reports/stops')}
-          icon={<PauseCircleFilledIcon />}
-          selected={location.pathname === '/reports/stops'}
-        />
-        <MenuItem
-          title={t('reportSummary')}
-          link={buildLink('/reports/summary')}
-          icon={<FormatListBulletedIcon />}
-          selected={location.pathname === '/reports/summary'}
-        />
-        <MenuItem
-          title={t('reportChart')}
-          link={buildLink('/reports/chart')}
-          icon={<TrendingUpIcon />}
-          selected={location.pathname === '/reports/chart'}
-        />
-        <MenuItem title={t('reportReplay')} link={buildLink('/replay')} icon={<RouteIcon />} />
-        <MenuItem
-          title={t('reportPositions')}
-          link={buildLink('/reports/route')}
-          icon={<TimelineIcon />}
-          selected={location.pathname === '/reports/route'}
-        />
-      </List>
-      <Divider />
-      <List>
-        <MenuItem
-          title={t('sharedLogs')}
-          link="/reports/logs"
-          icon={<NotesIcon />}
-          selected={location.pathname === '/reports/logs'}
-        />
-        {!readonly && (
-          <MenuItem
-            title={t('reportScheduled')}
-            link="/reports/scheduled"
-            icon={<EventRepeatIcon />}
-            selected={location.pathname === '/reports/scheduled'}
-          />
-        )}
-        {admin && (
-          <MenuItem
-            title={t('statisticsTitle')}
-            link="/reports/statistics"
-            icon={<BarChartIcon />}
-            selected={location.pathname === '/reports/statistics'}
-          />
-        )}
-        {admin && (
-          <MenuItem
-            title={t('reportAudit')}
-            link="/reports/audit"
-            icon={<VerifiedUserIcon />}
-            selected={location.pathname === '/reports/audit'}
-          />
-        )}
-      </List>
-    </>
+    <Box className={classes.sidebar}>
+      {renderList(primaryItems)}
+      <Divider className={classes.divider} sx={{ my: 1 }} />
+      {renderList(secondaryItems)}
+    </Box>
   );
 };
 

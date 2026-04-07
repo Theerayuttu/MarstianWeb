@@ -147,26 +147,61 @@ const EventReportPage = () => {
   });
 
   const onExport = useCatch(async () => {
-    const sheets = new Map();
-    items.forEach((item) => {
-      const deviceName = devices[item.deviceId].name;
-      if (!sheets.has(deviceName)) {
-        sheets.set(deviceName, []);
-      }
-      const row = {};
-      columns.forEach((key) => {
-        const header = t(columnsMap.get(key));
-        if (key === 'attributes' && item.type === 'media') {
-          row[header] = item.attributes.file;
-        } else if (key === 'address') {
-          const position = positions[item.positionId];
-          row[header] = position ? formatAddress(position, coordinateFormat) : '';
-        } else {
-          row[header] = formatValue(item, key);
+    const formatExportValue = (item, key) => {
+      switch (key) {
+        case 'eventTime':
+          return formatTime(item.eventTime, 'seconds');
+        case 'type':
+          return t(prefixString('event', item.type));
+        case 'geofenceId': {
+          if (item.geofenceId > 0) {
+            return geofences[item.geofenceId]?.name || '';
+          }
+          return '';
         }
+        case 'maintenanceId':
+          return item.maintenanceId > 0 ? item.maintenanceId : '';
+        case 'address': {
+          const positionItem = positions[item.positionId];
+          return positionItem ? formatAddress(positionItem, coordinateFormat) : item.address || '';
+        }
+        case 'attributes':
+          switch (item.type) {
+            case 'alarm':
+              return t(prefixString('alarm', item.attributes.alarm));
+            case 'deviceOverspeed':
+              return formatSpeed(item.attributes.speed, speedUnit, t);
+            case 'driverChanged':
+              return item.attributes.driverUniqueId || '';
+            case 'media':
+              return item.attributes.file || '';
+            case 'commandResult':
+              return item.attributes.result || '';
+            default:
+              return '';
+          }
+        default:
+          return item[key] ?? '';
+      }
+    };
+
+    const rows = items.map((item) => {
+      const row = {
+        [t('sharedDevice')]: devices[item.deviceId]?.name || '',
+      };
+
+      columns.forEach((key) => {
+        row[t(columnsMap.get(key))] = formatExportValue(item, key);
       });
-      sheets.get(deviceName).push(row);
+
+      return row;
     });
+
+    if (!rows.length) {
+      return;
+    }
+
+    const sheets = new Map([[t('reportEvents'), rows]]);
     await exportExcel(t('reportEvents'), 'events.xlsx', sheets, theme);
   });
 
@@ -301,7 +336,7 @@ const EventReportPage = () => {
               <ColumnSelect columns={columns} setColumns={setColumns} columnsArray={columnsArray} />
             </ReportFilter>
           </div>
-          <Table>
+          <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
                 <TableCell className={classes.columnAction} />

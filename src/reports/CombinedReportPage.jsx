@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import ReportFilter from './components/ReportFilter';
@@ -54,6 +54,8 @@ const CombinedReportPage = () => {
     }
   });
 
+  const tableRef = useRef(null);
+
   return (
     <PageLayout menu={<ReportsMenu />} breadcrumbs={['reportTitle', 'reportCombined']}>
       <div className={classes.container}>
@@ -79,7 +81,7 @@ const CombinedReportPage = () => {
           <div className={classes.header}>
             <ReportFilter onShow={onShow} deviceType="multiple" loading={loading} />
           </div>
-          <Table>
+          <Table ref={tableRef} stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
                 <TableCell>{t('sharedDevice')}</TableCell>

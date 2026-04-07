@@ -6,11 +6,10 @@ import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from '@m
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import {
-  formatAddress,
   formatDistance,
-  formatVolume,
   formatTime,
   formatNumericHours,
+  formatPercentage,
 } from '../common/util/formatter';
 import ReportFilter from './components/ReportFilter';
 import { useAttributePreference, usePreference } from '../common/util/preferences';
@@ -32,6 +31,7 @@ import MapScale from '../map/MapScale';
 import fetchOrThrow from '../common/util/fetchOrThrow';
 import exportExcel from '../common/util/exportExcel';
 import { deviceEquality } from '../common/util/deviceEquality';
+import { resolveAddress } from '../common/util/resolveAddress';
 
 const columnsArray = [
   ['startTime', 'reportStartTime'],
@@ -51,9 +51,10 @@ const StopReportPage = () => {
   const theme = useTheme();
 
   const devices = useSelector((state) => state.devices.items, deviceEquality(['id', 'name']));
+  const server = useSelector((state) => state.session.server);
 
   const distanceUnit = useAttributePreference('distanceUnit');
-  const volumeUnit = useAttributePreference('volumeUnit');
+  //const volumeUnit = useAttributePreference('volumeUnit');
   const coordinateFormat = usePreference('coordinateFormat');
 
   const [columns, setColumns] = usePersistedState('stopColumns', [
@@ -82,23 +83,33 @@ const StopReportPage = () => {
   });
 
   const onExport = useCatch(async () => {
+    const addressCache = new Map();
     const sheets = new Map();
-    items.forEach((item) => {
+    for (const item of items) {
       const deviceName = devices[item.deviceId].name;
       if (!sheets.has(deviceName)) {
         sheets.set(deviceName, []);
       }
       const row = {};
-      columns.forEach((key) => {
+      row[t('sharedDevice')] = deviceName;
+      for (const key of columns) {
         const header = t(columnsMap.get(key));
         if (key === 'address') {
-          row[header] = formatAddress(item, coordinateFormat);
+          row[header] = await resolveAddress({
+            latitude: item.latitude,
+            longitude: item.longitude,
+            originalAddress: null,
+            server,
+            coordinateFormat,
+            useQueue: items.length > 62,
+            cache: addressCache,
+          });
         } else {
           row[header] = formatValue(item, key);
         }
-      });
+      }
       sheets.get(deviceName).push(row);
-    });
+    }
     await exportExcel(t('reportStops'), 'stops.xlsx', sheets, theme);
   });
 
@@ -119,17 +130,19 @@ const StopReportPage = () => {
       case 'startOdometer':
         return formatDistance(value, distanceUnit, t);
       case 'duration':
-        return formatNumericHours(value, t);
+        return formatNumericHours(value, t, 'h:m');
       case 'engineHours':
-        return value > 0 ? formatNumericHours(value, t) : null;
+        return value > 0 ? formatNumericHours(value, t, 'h:m') : 0;
       case 'spentFuel':
-        return value > 0 ? formatVolume(value, volumeUnit, t) : null;
+        return value > 0 ? formatPercentage(value) : 0;
       case 'address':
         return (
           <AddressValue
             latitude={item.latitude}
             longitude={item.longitude}
-            originalAddress={value}
+            originalAddress={null}
+            addressshow={true}
+            useQueue={items.length > 62}
           />
         );
       default:
@@ -172,7 +185,7 @@ const StopReportPage = () => {
               <ColumnSelect columns={columns} setColumns={setColumns} columnsArray={columnsArray} />
             </ReportFilter>
           </div>
-          <Table>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell className={classes.columnAction} />

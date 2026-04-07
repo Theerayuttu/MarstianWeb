@@ -29,7 +29,9 @@ const exportExcel = async (title, fileName, sheets, theme) => {
     const headerRow = worksheet.addRow(headers);
     headerRow.eachCell((cell) => {
       cell.border = borderDefinition;
-      cell.font = {};
+      cell.font = {
+        color: { argb: 'FFFFFFFF' },
+      };
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
