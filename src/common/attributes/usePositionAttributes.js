@@ -220,7 +220,7 @@ export default (t) =>
       fuel: {
         name: t('positionFuel'),
         type: 'number',
-        dataType: 'volume',
+        dataType: 'percentage',
       },
       fuelUsed: {
         name: t('positionFuelUsed'),

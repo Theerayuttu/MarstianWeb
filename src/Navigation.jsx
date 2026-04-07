@@ -54,11 +54,13 @@ import LogsPage from './reports/LogsPage';
 import SharePage from './settings/SharePage';
 import AnnouncementPage from './settings/AnnouncementPage';
 import EmulatorPage from './other/EmulatorPage';
+import TimelinePage from './other/TimelinePage';
 import Loader from './common/components/Loader';
 import { generateLoginToken } from './common/components/NativeInterface';
 import { useLocalization } from './common/components/LocalizationProvider';
 import fetchOrThrow from './common/util/fetchOrThrow';
 import AuditPage from './reports/AuditPage';
+import PositionLivePage from './other/PositionLivePage';
 
 const Navigation = () => {
   const dispatch = useDispatch();
@@ -120,9 +122,11 @@ const Navigation = () => {
         <Route index element={<MainPage />} />
 
         <Route path="position/:id" element={<PositionPage />} />
+        <Route path="positionlive/:id" element={<PositionLivePage />} />
         <Route path="network/:positionId" element={<NetworkPage />} />
         <Route path="event/:id" element={<EventPage />} />
         <Route path="replay" element={<ReplayPage />} />
+        <Route path="timeline/:id" element={<TimelinePage />} />
         <Route path="geofences" element={<GeofencesPage />} />
         <Route path="emulator" element={<EmulatorPage />} />
 

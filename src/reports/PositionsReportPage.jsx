@@ -1,6 +1,8 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { IconButton, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { useSelector } from 'react-redux';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import ReportFilter, { updateReportParams } from './components/ReportFilter';
@@ -25,11 +27,15 @@ import { useRestriction } from '../common/util/permissions';
 import CollectionActions from '../settings/components/CollectionActions';
 import fetchOrThrow from '../common/util/fetchOrThrow';
 import SelectField from '../common/components/SelectField';
+import exportExcel from '../common/util/exportExcel';
 
 const PositionsReportPage = () => {
   const navigate = useNavigate();
   const { classes } = useReportStyles();
   const t = useTranslation();
+  const theme = useTheme();
+
+  const devices = useSelector((state) => state.devices.items);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -95,13 +101,26 @@ const PositionsReportPage = () => {
     }
   });
 
-  const onExport = useCatch(async ({ deviceIds, from, to }) => {
-    const query = new URLSearchParams({ from, to });
-    if (geofenceId) {
-      query.append('geofenceId', geofenceId);
-    }
-    deviceIds.forEach((deviceId) => query.append('deviceId', deviceId));
-    window.location.assign(`/api/positions/csv?${query.toString()}`);
+  const onExport = useCatch(async () => {
+    const rows = items.map((item) => {
+      const row = {
+        [t('sharedDevice')]: devices[item.deviceId]?.name || item.deviceId,
+      };
+
+      columns.forEach((key) => {
+        const value = Object.prototype.hasOwnProperty.call(item, key)
+          ? item[key]
+          : item.attributes?.[key];
+        row[positionAttributes[key]?.name || key] = Array.isArray(value)
+          ? value.join(', ')
+          : (value ?? '');
+      });
+
+      return row;
+    });
+
+    const sheets = new Map([[t('reportPositions'), rows]]);
+    await exportExcel(t('reportPositions'), 'positions.xlsx', sheets, theme);
   });
 
   const onSchedule = useCatch(async (deviceIds, groupIds, report) => {
@@ -162,7 +181,7 @@ const PositionsReportPage = () => {
               />
             </ReportFilter>
           </div>
-          <Table>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell className={classes.columnAction} />

@@ -1,4 +1,4 @@
-import { Divider, List } from '@mui/material';
+import { Divider, List, ListItemButton, ListItemIcon, ListItemText, Typography, Box } from '@mui/material';
 import TuneIcon from '@mui/icons-material/Tune';
 import DrawIcon from '@mui/icons-material/Draw';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -14,16 +14,63 @@ import HelpIcon from '@mui/icons-material/Help';
 import PaymentIcon from '@mui/icons-material/Payment';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import CalculateIcon from '@mui/icons-material/Calculate';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useTranslation } from '../../common/components/LocalizationProvider';
 import { useAdministrator, useManager, useRestriction } from '../../common/util/permissions';
 import useFeatures from '../../common/util/useFeatures';
-import MenuItem from '../../common/components/MenuItem';
+import { makeStyles } from 'tss-react/mui';
+import { layoutPalette } from '../../common/theme/layoutTokens';
+
+const useStyles = makeStyles()((theme) => ({
+  sidebar: {
+    background: layoutPalette.sidebarGradient,
+    color: layoutPalette.sidebarTextPrimary,
+    padding: theme.spacing(2.5, 2),
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+    minHeight: '100%',
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  navList: {
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(0.75),
+  },
+  navItem: {
+    borderRadius: 14,
+    padding: theme.spacing(1.1, 1.5),
+    color: layoutPalette.sidebarTextMuted,
+    transition: 'all 160ms ease',
+    '& .MuiListItemIcon-root': {
+      minWidth: 38,
+      color: 'inherit',
+    },
+    '& .MuiListItemText-primary': {
+      fontWeight: 600,
+    },
+  },
+  navItemActive: {
+    background: layoutPalette.navItemActiveBackground,
+    color: layoutPalette.accentContrast,
+    boxShadow: layoutPalette.navItemActiveShadow,
+    border: layoutPalette.navItemActiveBorder,
+  },
+  divider: {
+    borderColor: layoutPalette.divider,
+  },
+}));
 
 const SettingsMenu = () => {
   const t = useTranslation();
   const location = useLocation();
+  const { classes, cx } = useStyles();
 
   const readonly = useRestriction('readonly');
   const admin = useAdministrator();
@@ -34,129 +81,178 @@ const SettingsMenu = () => {
 
   const features = useFeatures();
 
+  const buildItem = (title, link, icon, selected, options = {}) => ({
+    title,
+    link,
+    icon,
+    selected,
+    ...options,
+  });
+
+  const primaryItems = [
+    buildItem(t('sharedPreferences'), '/settings/preferences', <TuneIcon />, location.pathname === '/settings/preferences'),
+  ];
+
+  if (!readonly) {
+    primaryItems.push(
+      buildItem(
+        t('sharedNotifications'),
+        '/settings/notifications',
+        <NotificationsIcon />,
+        location.pathname.startsWith('/settings/notification'),
+      ),
+      buildItem(
+        t('settingsUser'),
+        `/settings/user/${userId}`,
+        <PersonIcon />,
+        location.pathname === `/settings/user/${userId}`,
+      ),
+      buildItem(
+        t('deviceTitle'),
+        '/settings/devices',
+        <DnsIcon />,
+        location.pathname.startsWith('/settings/device'),
+      ),
+      buildItem(
+        t('sharedGeofences'),
+        '/geofences',
+        <DrawIcon />,
+        location.pathname.startsWith('/settings/geofence'),
+      ),
+    );
+
+    if (!features.disableGroups) {
+      primaryItems.push(
+        buildItem(
+          t('settingsGroups'),
+          '/settings/groups',
+          <FolderIcon />,
+          location.pathname.startsWith('/settings/group'),
+        ),
+      );
+    }
+    if (!features.disableDrivers) {
+      primaryItems.push(
+        buildItem(
+          t('sharedDrivers'),
+          '/settings/drivers',
+          <PersonIcon />,
+          location.pathname.startsWith('/settings/driver'),
+        ),
+      );
+    }
+    if (!features.disableCalendars) {
+      primaryItems.push(
+        buildItem(
+          t('sharedCalendars'),
+          '/settings/calendars',
+          <TodayIcon />,
+          location.pathname.startsWith('/settings/calendar'),
+        ),
+      );
+    }
+    if (!features.disableComputedAttributes) {
+      primaryItems.push(
+        buildItem(
+          t('sharedComputedAttributes'),
+          '/settings/attributes',
+          <CalculateIcon />,
+          location.pathname.startsWith('/settings/attribute'),
+        ),
+      );
+    }
+    if (!features.disableMaintenance) {
+      primaryItems.push(
+        buildItem(
+          t('sharedMaintenance'),
+          '/settings/maintenances',
+          <BuildIcon />,
+          location.pathname.startsWith('/settings/maintenance'),
+        ),
+      );
+    }
+    if (!features.disableSavedCommands) {
+      primaryItems.push(
+        buildItem(
+          t('sharedSavedCommands'),
+          '/settings/commands',
+          <SendIcon />,
+          location.pathname.startsWith('/settings/command'),
+        ),
+      );
+    }
+  }
+
+  if (billingLink) {
+    primaryItems.push(buildItem(t('userBilling'), billingLink, <PaymentIcon />, false, { external: true }));
+  }
+  if (supportLink) {
+    primaryItems.push(buildItem(t('settingsSupport'), supportLink, <HelpIcon />, false, { external: true }));
+  }
+
+  const managerItems = [];
+  if (manager) {
+    managerItems.push(
+      buildItem(
+        t('serverAnnouncement'),
+        '/settings/announcement',
+        <CampaignIcon />,
+        location.pathname === '/settings/announcement',
+      ),
+    );
+    if (admin) {
+      managerItems.push(
+        buildItem(
+          t('settingsServer'),
+          '/settings/server',
+          <SettingsIcon />,
+          location.pathname === '/settings/server',
+        ),
+      );
+    }
+    managerItems.push(
+      buildItem(
+        t('settingsUsers'),
+        '/settings/users',
+        <PeopleIcon />,
+        location.pathname.startsWith('/settings/user') && location.pathname !== `/settings/user/${userId}`,
+      ),
+    );
+  }
+
+  const renderList = (items) => (
+    <List className={classes.navList} disablePadding>
+      {items.map((item) => {
+        const Component = item.external ? 'a' : Link;
+        const componentProps = item.external
+          ? { href: item.link, target: '_blank', rel: 'noopener noreferrer' }
+          : { to: item.link };
+        return (
+          <ListItemButton
+            key={`${item.link}-${item.title}`}
+            component={Component}
+            {...componentProps}
+            className={cx(classes.navItem, { [classes.navItemActive]: item.selected })}
+            selected={item.selected}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.title} />
+          </ListItemButton>
+        );
+      })}
+    </List>
+  );
+
   return (
-    <>
-      <List>
-        <MenuItem
-          title={t('sharedPreferences')}
-          link="/settings/preferences"
-          icon={<TuneIcon />}
-          selected={location.pathname === '/settings/preferences'}
-        />
-        {!readonly && (
-          <>
-            <MenuItem
-              title={t('sharedNotifications')}
-              link="/settings/notifications"
-              icon={<NotificationsIcon />}
-              selected={location.pathname.startsWith('/settings/notification')}
-            />
-            <MenuItem
-              title={t('settingsUser')}
-              link={`/settings/user/${userId}`}
-              icon={<PersonIcon />}
-              selected={location.pathname === `/settings/user/${userId}`}
-            />
-            <MenuItem
-              title={t('deviceTitle')}
-              link="/settings/devices"
-              icon={<DnsIcon />}
-              selected={location.pathname.startsWith('/settings/device')}
-            />
-            <MenuItem
-              title={t('sharedGeofences')}
-              link="/geofences"
-              icon={<DrawIcon />}
-              selected={location.pathname.startsWith('/settings/geofence')}
-            />
-            {!features.disableGroups && (
-              <MenuItem
-                title={t('settingsGroups')}
-                link="/settings/groups"
-                icon={<FolderIcon />}
-                selected={location.pathname.startsWith('/settings/group')}
-              />
-            )}
-            {!features.disableDrivers && (
-              <MenuItem
-                title={t('sharedDrivers')}
-                link="/settings/drivers"
-                icon={<PersonIcon />}
-                selected={location.pathname.startsWith('/settings/driver')}
-              />
-            )}
-            {!features.disableCalendars && (
-              <MenuItem
-                title={t('sharedCalendars')}
-                link="/settings/calendars"
-                icon={<TodayIcon />}
-                selected={location.pathname.startsWith('/settings/calendar')}
-              />
-            )}
-            {!features.disableComputedAttributes && (
-              <MenuItem
-                title={t('sharedComputedAttributes')}
-                link="/settings/attributes"
-                icon={<CalculateIcon />}
-                selected={location.pathname.startsWith('/settings/attribute')}
-              />
-            )}
-            {!features.disableMaintenance && (
-              <MenuItem
-                title={t('sharedMaintenance')}
-                link="/settings/maintenances"
-                icon={<BuildIcon />}
-                selected={location.pathname.startsWith('/settings/maintenance')}
-              />
-            )}
-            {!features.disableSavedCommands && (
-              <MenuItem
-                title={t('sharedSavedCommands')}
-                link="/settings/commands"
-                icon={<SendIcon />}
-                selected={location.pathname.startsWith('/settings/command')}
-              />
-            )}
-          </>
-        )}
-        {billingLink && (
-          <MenuItem title={t('userBilling')} link={billingLink} icon={<PaymentIcon />} />
-        )}
-        {supportLink && (
-          <MenuItem title={t('settingsSupport')} link={supportLink} icon={<HelpIcon />} />
-        )}
-      </List>
-      {manager && (
+    <Box className={classes.sidebar}>
+      {renderList(primaryItems)}
+      {managerItems.length > 0 && (
         <>
-          <Divider />
-          <List>
-            <MenuItem
-              title={t('serverAnnouncement')}
-              link="/settings/announcement"
-              icon={<CampaignIcon />}
-              selected={location.pathname === '/settings/announcement'}
-            />
-            {admin && (
-              <MenuItem
-                title={t('settingsServer')}
-                link="/settings/server"
-                icon={<SettingsIcon />}
-                selected={location.pathname === '/settings/server'}
-              />
-            )}
-            <MenuItem
-              title={t('settingsUsers')}
-              link="/settings/users"
-              icon={<PeopleIcon />}
-              selected={
-                location.pathname.startsWith('/settings/user') &&
-                location.pathname !== `/settings/user/${userId}`
-              }
-            />
-          </List>
+          <Divider className={classes.divider} sx={{ my: 1 }} />
+          {renderList(managerItems)}
         </>
       )}
-    </>
+    </Box>
   );
 };
 

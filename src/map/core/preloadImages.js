@@ -27,6 +27,28 @@ import tramSvg from '../../resources/images/icon/tram.svg';
 import truckSvg from '../../resources/images/icon/truck.svg';
 import vanSvg from '../../resources/images/icon/van.svg';
 
+import suvSvg from '../../resources/images/icon/suv.svg';
+import excavatorSvg from '../../resources/images/icon/excavator.svg';
+import truckcraneSvg from '../../resources/images/icon/truckcrane.svg';
+import graderSvg from '../../resources/images/icon/grader.svg';
+import bulldozerSvg from '../../resources/images/icon/bulldozer.svg';
+import boringmachineSvg from '../../resources/images/icon/boringmachine.svg';
+import rollermachineSvg from '../../resources/images/icon/rollermachine.svg';
+import paverSvg from '../../resources/images/icon/paver.svg';
+import drumtruckSvg from '../../resources/images/icon/drumtruck.svg';
+import trailertruckSvg from '../../resources/images/icon/trailertruck.svg';
+import concretetruckSvg from '../../resources/images/icon/concretetruck.svg';
+import roadrollerSvg from '../../resources/images/icon/roadroller.svg';
+import forkliftSvg from '../../resources/images/icon/forklift.svg';
+import forklift2Svg from '../../resources/images/icon/forklift2.svg';
+import excavator2Svg from '../../resources/images/icon/excavator2.svg';
+import asphaltroadSvg from '../../resources/images/icon/asphaltroad.svg';
+import crawlercraneSvg from '../../resources/images/icon/crawlercrane.svg';
+import loaderSvg from '../../resources/images/icon/loader.svg';
+import forklift3Svg from '../../resources/images/icon/forklift3.svg';
+import telescoplifterSvg from '../../resources/images/icon/telescoplifter.svg';
+import backfillcompactorSvg from '../../resources/images/icon/backfillcompactor.svg';
+
 export const mapIcons = {
   animal: animalSvg,
   bicycle: bicycleSvg,
@@ -50,12 +72,33 @@ export const mapIcons = {
   tram: tramSvg,
   truck: truckSvg,
   van: vanSvg,
+  van: vanSvg,
+  suv: suvSvg,
+  excavator: excavatorSvg,
+  truckcrane: truckcraneSvg,
+  grader: graderSvg,
+  bulldozer: bulldozerSvg,
+  boringmachine: boringmachineSvg,
+  rollermachine: rollermachineSvg,
+  paver: paverSvg,
+  drumtruck: drumtruckSvg,
+  trailertruck: trailertruckSvg,
+  concretetruck: concretetruckSvg,
+  roadroller: roadrollerSvg,
+  forklift: forkliftSvg,
+  forklift2: forklift2Svg,
+  excavator2: excavator2Svg,
+  asphaltroad: asphaltroadSvg,
+  crawlercrane: crawlercraneSvg,
+  loader: loaderSvg,
+  forklift3: forklift3Svg,
+  telescoplifter: telescoplifterSvg,
+  backfillcompactor: backfillcompactorSvg,
 };
 
 export const mapIconKey = (category) => {
   switch (category) {
     case 'offroad':
-    case 'pickup':
       return 'car';
     case 'trolleybus':
       return 'bus';

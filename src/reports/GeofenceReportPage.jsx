@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useTheme } from '@mui/material/styles';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { formatNumericHours, formatTime } from '../common/util/formatter';
 import ReportFilter, { updateReportParams } from './components/ReportFilter';
@@ -13,6 +14,7 @@ import { useCatch } from '../reactHelper';
 import useReportStyles from './common/useReportStyles';
 import TableShimmer from '../common/components/TableShimmer';
 import fetchOrThrow from '../common/util/fetchOrThrow';
+import exportExcel from '../common/util/exportExcel';
 import SelectField from '../common/components/SelectField';
 import { deviceEquality } from '../common/util/deviceEquality';
 
@@ -27,6 +29,7 @@ const columnsMap = new Map(columnsArray);
 const GeofenceReportPage = () => {
   const { classes } = useReportStyles();
   const t = useTranslation();
+  const theme = useTheme();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const geofenceIds = useMemo(() => searchParams.getAll('geofenceId').map(Number), [searchParams]);
@@ -72,10 +75,27 @@ const GeofenceReportPage = () => {
     }
   };
 
+  const onExport = useCatch(async () => {
+    const sheets = new Map();
+    items.forEach((item) => {
+      const deviceName = devices[item.deviceId]?.name || item.deviceId;
+      if (!sheets.has(deviceName)) {
+        sheets.set(deviceName, []);
+      }
+      const row = {};
+      columns.forEach((key) => {
+        const header = t(columnsMap.get(key));
+        row[header] = formatValue(item, key);
+      });
+      sheets.get(deviceName).push(row);
+    });
+    await exportExcel(t('sharedGeofences'), 'geofences.xlsx', sheets, theme);
+  });
+
   return (
     <PageLayout menu={<ReportsMenu />} breadcrumbs={['reportTitle', 'sharedGeofences']}>
       <div className={classes.header}>
-        <ReportFilter onShow={onShow} deviceType="multiple" loading={loading}>
+        <ReportFilter onShow={onShow} onExport={onExport} deviceType="multiple" loading={loading}>
           <div className={classes.filterItem}>
             <SelectField
               label={t('sharedGeofences')}
@@ -92,7 +112,7 @@ const GeofenceReportPage = () => {
           <ColumnSelect columns={columns} setColumns={setColumns} columnsArray={columnsArray} />
         </ReportFilter>
       </div>
-      <Table>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell>{t('sharedDevice')}</TableCell>

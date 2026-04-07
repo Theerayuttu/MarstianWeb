@@ -51,10 +51,21 @@ const MapPositions = ({
       name: device.name,
       fixTime: formatTime(position.fixTime, 'seconds'),
       category: mapIconKey(device.category),
-      color: showStatus ? position.attributes.color || getStatusColor(device.status) : 'neutral',
+      color: showStatus ? iconColor(device.status , position.attributes.color || getStatusColor(device.status) , position.attributes.ignition ) : 'neutral',
       rotation: position.course,
       direction: showDirection,
     };
+  };
+
+  const iconColor = ( status, attrcolor , ignition ) => {
+    let colors = showStatus ? attrcolor || getStatusColor(status) : 'neutral';
+    if( status == 'online' && !ignition ) {
+      colors = 'neutral';
+    }
+    else if( status == 'unknown' && ignition ) {
+      colors = 'success'; // support Cartrack data
+    }
+    return colors;
   };
 
   const onMouseEnter = () => (map.getCanvas().style.cursor = 'pointer');
@@ -115,6 +126,21 @@ const MapPositions = ({
       },
     });
     [id, selected].forEach((source) => {
+      if (source === selected) {
+        map.addLayer({
+          id: `plusRing-${source}`,
+          type: 'circle',
+          source,
+          filter: ['!has', 'point_count'],
+          paint: {
+            'circle-radius': 22 * iconScale,
+            'circle-color': 'rgba(33, 150, 243, 0.18)',
+            'circle-stroke-color': '#2196f3',
+            'circle-stroke-width': 3,
+            'circle-stroke-opacity': 1,
+          },
+        });
+      }
       map.addLayer({
         id: source,
         type: 'symbol',
@@ -191,6 +217,9 @@ const MapPositions = ({
 
         if (map.getLayer(source)) {
           map.removeLayer(source);
+        }
+        if (map.getLayer(`plusRing-${source}`)) {
+          map.removeLayer(`plusRing-${source}`);
         }
         if (map.getLayer(`direction-${source}`)) {
           map.removeLayer(`direction-${source}`);

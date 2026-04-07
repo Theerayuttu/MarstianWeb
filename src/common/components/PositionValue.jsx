@@ -66,6 +66,9 @@ const PositionValue = ({ position, property, attribute }) => {
         return formatTemperature(value);
       case 'alarm':
         return formatAlarm(value, t);
+      case 'adc2':
+      case 'adc3':
+        return formatNumber(value, 2);
       default:
         switch (positionAttributes[key]?.dataType) {
           case 'speed':

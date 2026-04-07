@@ -56,6 +56,7 @@ const UserPage = () => {
   const openIdForced = useSelector((state) => state.session.server.openIdForce);
   const totpEnable = useSelector((state) => state.session.server.attributes.totpEnable);
   const totpForce = useSelector((state) => state.session.server.attributes.totpForce);
+  const keyCodeRegis = useSelector((state) => state.session.server.attributes.regiskey); 
 
   const mapStyles = useMapStyles();
   const commonUserAttributes = useCommonUserAttributes(t);
@@ -137,6 +138,7 @@ const UserPage = () => {
       onItemSaved={onItemSaved}
       menu={<SettingsMenu />}
       breadcrumbs={['settingsTitle', 'settingsUser']}
+      keycode={keyCodeRegis}
     >
       {item && (
         <>
