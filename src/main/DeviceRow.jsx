@@ -9,23 +9,11 @@ import {
   ListItemButton,
   Typography,
 } from '@mui/material';
-import BatteryFullIcon from '@mui/icons-material/BatteryFull';
-import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
-import Battery60Icon from '@mui/icons-material/Battery60';
-import BatteryCharging60Icon from '@mui/icons-material/BatteryCharging60';
-import Battery20Icon from '@mui/icons-material/Battery20';
-import BatteryCharging20Icon from '@mui/icons-material/BatteryCharging20';
 import ErrorIcon from '@mui/icons-material/Error';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { devicesActions } from '../store';
-import {
-  formatAlarm,
-  formatBoolean,
-  formatPercentage,
-  formatStatus,
-  getStatusColor,
-} from '../common/util/formatter';
+import { formatAlarm, formatBoolean, formatStatus } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import { mapIconKey, mapIcons } from '../map/core/preloadImages';
 import { useAdministrator } from '../common/util/permissions';
@@ -79,7 +67,7 @@ const DeviceRow = ({ devices, index, style }) => {
   const item = devices[index];
   const position = useSelector((state) => state.session.positions[item.id]);
 
-  const events = useSelector((state) => state.events.items.filter((e) =>  e.deviceId === item.id));
+  const events = useSelector((state) => state.events.items.filter((e) => e.deviceId === item.id));
   const eventid = events[0];
 
   const devicePrimary = useAttributePreference('devicePrimary', 'name');
@@ -131,7 +119,7 @@ const DeviceRow = ({ devices, index, style }) => {
     const timeDifference = currentDate - pastDate;
     const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
     return daysDifference; // Return  number of days
-  };
+  }
 
   const getStatusColorIcon = (item) => {
     switch (item.status) {
@@ -150,14 +138,14 @@ const DeviceRow = ({ devices, index, style }) => {
   };
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case "online":
-        return "success";
-      case "offline":
-        return "error";
-      case "unknown":
-        return "neutral";
+      case 'online':
+        return 'success';
+      case 'offline':
+        return 'error';
+      case 'unknown':
+        return 'neutral';
       default:
-        return "neutral";
+        return 'neutral';
     }
   };
 
@@ -171,7 +159,7 @@ const DeviceRow = ({ devices, index, style }) => {
         className={selectedDeviceId === item.id ? classes.selected : null}
       >
         <ListItemAvatar>
-          <Avatar style={{ background: getStatusColorIcon(item) }} >
+          <Avatar style={{ background: getStatusColorIcon(item) }}>
             <img className={classes.icon} src={mapIcons[mapIconKey(item.category)]} alt="" />
           </Avatar>
         </ListItemAvatar>
@@ -197,35 +185,53 @@ const DeviceRow = ({ devices, index, style }) => {
               </Tooltip>
             )}
             {/**Add Events Maintenance */}
-            {eventid &&  (
+            {eventid && (
               <>
-                { (eventid.hasOwnProperty('type') && eventid.type === "maintenance" && eventid.deviceId === item.id) && (
-                  <Tooltip title={`${eventid.attributes.message}`}>
-                    <IconButton size="small">
-                      <BuildCircleIcon fontSize="medium" className={classes.warning} />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                {eventid.hasOwnProperty('type') &&
+                  eventid.type === 'maintenance' &&
+                  eventid.deviceId === item.id && (
+                    <Tooltip title={`${eventid.attributes.message}`}>
+                      <IconButton size="small">
+                        <BuildCircleIcon fontSize="medium" className={classes.warning} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
               </>
             )}
             {position.attributes.hasOwnProperty('ignition') && (
-              <Tooltip title={position.attributes.output === 1 ? (t('commandEngineStop')) : (`${t('positionIgnition')}: ${formatBoolean(position.attributes.ignition, t)}`)}>
+              <Tooltip
+                title={
+                  position.attributes.output === 1
+                    ? t('commandEngineStop')
+                    : `${t('positionIgnition')}: ${formatBoolean(position.attributes.ignition, t)}`
+                }
+              >
                 <IconButton size="small">
                   {position.attributes.ignition ? (
-                    <EngineIcon width={25} height={25} className={position.attributes.output === 1 ? classes.error : classes.success} />
+                    <EngineIcon
+                      width={25}
+                      height={25}
+                      className={position.attributes.output === 1 ? classes.error : classes.success}
+                    />
                   ) : (
-                    <EngineIcon width={20} height={20} className={position.attributes.output === 1 ? classes.error : classes.neutral} />
+                    <EngineIcon
+                      width={20}
+                      height={20}
+                      className={position.attributes.output === 1 ? classes.error : classes.neutral}
+                    />
                   )}
                 </IconButton>
               </Tooltip>
             )}
-            {position.attributes.hasOwnProperty('ignition') && position.attributes.output === 1 && position.attributes.ignition && (
-              <Tooltip title={`${t('alarmViolation')}`}>
-                <IconButton size="small">
-                  <GppMaybeIcon fontSize="small" className={classes.error} />
-                </IconButton>
-              </Tooltip>
-            )}
+            {position.attributes.hasOwnProperty('ignition') &&
+              position.attributes.output === 1 &&
+              position.attributes.ignition && (
+                <Tooltip title={`${t('alarmViolation')}`}>
+                  <IconButton size="small">
+                    <GppMaybeIcon fontSize="small" className={classes.error} />
+                  </IconButton>
+                </Tooltip>
+              )}
           </>
         )}
       </ListItemButton>

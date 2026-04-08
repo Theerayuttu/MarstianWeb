@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   AppBar,
   Breadcrumbs,
-  Divider,
   Drawer,
   IconButton,
   Toolbar,
@@ -11,8 +10,6 @@ import {
   useTheme,
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from './LocalizationProvider';
@@ -195,7 +192,9 @@ const PageLayout = ({ menu, breadcrumbs, children }) => {
           </div>
         </Toolbar>
       )}
-      <div className={cx(classes.drawerMenu, { [classes.drawerMenuMini]: miniVariant })}>{menu}</div>
+      <div className={cx(classes.drawerMenu, { [classes.drawerMenuMini]: miniVariant })}>
+        {menu}
+      </div>
     </div>
   );
 

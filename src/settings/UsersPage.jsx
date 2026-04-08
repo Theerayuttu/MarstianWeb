@@ -83,7 +83,7 @@ const UsersPage = () => {
   return (
     <PageLayout menu={<SettingsMenu />} breadcrumbs={['settingsTitle', 'settingsUsers']}>
       <SearchHeader keyword={searchKeyword} setKeyword={setSearchKeyword} />
-      <Table className={classes.table}>
+      <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
             <TableCell>{'ID'}</TableCell>

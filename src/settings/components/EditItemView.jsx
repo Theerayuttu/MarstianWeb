@@ -57,8 +57,8 @@ const EditItemView = ({
         },
       };
       item = patchedItem;
-    } 
-    
+    }
+
     if (id) {
       url += `/${id}`;
     }

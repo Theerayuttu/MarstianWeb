@@ -16,9 +16,11 @@ const columnsArray = [
   ['actionTime', 'positionServerTime'],
   ['address', 'positionAddress'],
   ['userId', 'settingsUser'],
+  ['userEmail', 'userEmail'],
   ['actionType', 'sharedActionType'],
   ['objectType', 'sharedQbjectType'],
   ['objectId', 'deviceIdentifier'],
+  ['attributes', 'sharedAttributes'],
 ];
 const columnsMap = new Map(columnsArray);
 
@@ -53,7 +55,7 @@ const AuditPage = () => {
           <ColumnSelect columns={columns} setColumns={setColumns} columnsArray={columnsArray} />
         </ReportFilter>
       </div>
-      <Table>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             {columns.map((key) => (
@@ -67,7 +69,11 @@ const AuditPage = () => {
               <TableRow key={item.id}>
                 {columns.map((key) => (
                   <TableCell key={key}>
-                    {key === 'actionTime' ? formatTime(item[key], 'minutes') : item[key]}
+                    {(() => {
+                      if (key === 'actionTime') return formatTime(item[key], 'minutes');
+                      if (key === 'attributes') return item[key] ? JSON.stringify(item[key]) : '';
+                      return item[key];
+                    })()}
                   </TableCell>
                 ))}
               </TableRow>

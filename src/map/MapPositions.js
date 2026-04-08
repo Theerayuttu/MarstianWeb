@@ -51,18 +51,23 @@ const MapPositions = ({
       name: device.name,
       fixTime: formatTime(position.fixTime, 'seconds'),
       category: mapIconKey(device.category),
-      color: showStatus ? iconColor(device.status , position.attributes.color || getStatusColor(device.status) , position.attributes.ignition ) : 'neutral',
+      color: showStatus
+        ? iconColor(
+            device.status,
+            position.attributes.color || getStatusColor(device.status),
+            position.attributes.ignition,
+          )
+        : 'neutral',
       rotation: position.course,
       direction: showDirection,
     };
   };
 
-  const iconColor = ( status, attrcolor , ignition ) => {
+  const iconColor = (status, attrcolor, ignition) => {
     let colors = showStatus ? attrcolor || getStatusColor(status) : 'neutral';
-    if( status == 'online' && !ignition ) {
+    if (status == 'online' && !ignition) {
       colors = 'neutral';
-    }
-    else if( status == 'unknown' && ignition ) {
+    } else if (status == 'unknown' && ignition) {
       colors = 'success'; // support Cartrack data
     }
     return colors;

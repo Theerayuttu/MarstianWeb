@@ -16,7 +16,6 @@ import TableShimmer from '../common/components/TableShimmer';
 import fetchOrThrow from '../common/util/fetchOrThrow';
 import exportExcel from '../common/util/exportExcel';
 import SelectField from '../common/components/SelectField';
-import exportExcel from '../common/util/exportExcel';
 import { deviceEquality } from '../common/util/deviceEquality';
 
 const columnsArray = [
@@ -60,23 +59,6 @@ const GeofenceReportPage = () => {
     } finally {
       setLoading(false);
     }
-  });
-
-  const onExport = useCatch(async () => {
-    const sheets = new Map();
-    items.forEach((item) => {
-      const deviceName = devices[item.deviceId].name;
-      if (!sheets.has(deviceName)) {
-        sheets.set(deviceName, []);
-      }
-      const row = {};
-      columns.forEach((key) => {
-        const header = t(columnsMap.get(key));
-        row[header] = formatValue(item, key);
-      });
-      sheets.get(deviceName).push(row);
-    });
-    await exportExcel(t('sharedGeofences'), 'geofences.xlsx', sheets, theme);
   });
 
   const formatValue = (item, key) => {

@@ -90,11 +90,19 @@ const ReportsMenu = () => {
   const primaryItems = [
     { title: t('reportCombined'), link: buildLink('/reports/combined'), icon: <StarIcon /> },
     { title: t('reportPositions'), link: buildLink('/reports/route'), icon: <TimelineIcon /> },
-    { title: t('reportEvents'), link: buildLink('/reports/events'), icon: <NotificationsActiveIcon /> },
+    {
+      title: t('reportEvents'),
+      link: buildLink('/reports/events'),
+      icon: <NotificationsActiveIcon />,
+    },
     { title: t('sharedGeofences'), link: buildLink('/reports/geofences'), icon: <PlaceIcon /> },
     { title: t('reportTrips'), link: buildLink('/reports/trips'), icon: <PlayCircleFilledIcon /> },
     { title: t('reportStops'), link: buildLink('/reports/stops'), icon: <PauseCircleFilledIcon /> },
-    { title: t('reportSummary'), link: buildLink('/reports/summary'), icon: <FormatListBulletedIcon /> },
+    {
+      title: t('reportSummary'),
+      link: buildLink('/reports/summary'),
+      icon: <FormatListBulletedIcon />,
+    },
     { title: t('reportChart'), link: buildLink('/reports/chart'), icon: <TrendingUpIcon /> },
     { title: t('reportReplay'), link: buildLink('/replay'), icon: <RouteIcon /> },
   ];

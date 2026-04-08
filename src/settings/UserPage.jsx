@@ -40,6 +40,8 @@ import useMapStyles from '../map/core/useMapStyles';
 import { map } from '../map/core/MapView';
 import useSettingsStyles from './common/useSettingsStyles';
 import fetchOrThrow from '../common/util/fetchOrThrow';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const UserPage = () => {
   const { classes } = useSettingsStyles();
@@ -56,7 +58,7 @@ const UserPage = () => {
   const openIdForced = useSelector((state) => state.session.server.openIdForce);
   const totpEnable = useSelector((state) => state.session.server.attributes.totpEnable);
   const totpForce = useSelector((state) => state.session.server.attributes.totpForce);
-  const keyCodeRegis = useSelector((state) => state.session.server.attributes.regiskey); 
+  const keyCodeRegis = useSelector((state) => state.session.server.attributes.regiskey);
 
   const mapStyles = useMapStyles();
   const commonUserAttributes = useCommonUserAttributes(t);
@@ -69,6 +71,7 @@ const UserPage = () => {
   const [deleteFailed, setDeleteFailed] = useState(false);
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const [revokeToken, setRevokeToken] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleDelete = useCatch(async () => {
     if (deleteEmail === currentUser.email) {
@@ -160,9 +163,24 @@ const UserPage = () => {
               />
               {!openIdForced && (
                 <TextField
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   onChange={(e) => setItem({ ...item, password: e.target.value })}
                   label={t('userPassword')}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                            size="small"
+                          >
+                            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
                 />
               )}
               {totpEnable && (

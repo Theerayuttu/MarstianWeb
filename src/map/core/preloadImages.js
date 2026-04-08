@@ -72,7 +72,6 @@ export const mapIcons = {
   tram: tramSvg,
   truck: truckSvg,
   van: vanSvg,
-  van: vanSvg,
   suv: suvSvg,
   excavator: excavatorSvg,
   truckcrane: truckcraneSvg,

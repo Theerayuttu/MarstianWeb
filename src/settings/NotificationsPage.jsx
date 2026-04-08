@@ -59,7 +59,7 @@ const NotificationsPage = () => {
   return (
     <PageLayout menu={<SettingsMenu />} breadcrumbs={['settingsTitle', 'sharedNotifications']}>
       <SearchHeader keyword={searchKeyword} setKeyword={setSearchKeyword} />
-      <Table className={classes.table}>
+      <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
             <TableCell>{t('sharedDescription')}</TableCell>

@@ -1,4 +1,4 @@
-import { Divider, List, ListItemButton, ListItemIcon, ListItemText, Typography, Box } from '@mui/material';
+import { Divider, List, ListItemButton, ListItemIcon, ListItemText, Box } from '@mui/material';
 import TuneIcon from '@mui/icons-material/Tune';
 import DrawIcon from '@mui/icons-material/Draw';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -90,7 +90,12 @@ const SettingsMenu = () => {
   });
 
   const primaryItems = [
-    buildItem(t('sharedPreferences'), '/settings/preferences', <TuneIcon />, location.pathname === '/settings/preferences'),
+    buildItem(
+      t('sharedPreferences'),
+      '/settings/preferences',
+      <TuneIcon />,
+      location.pathname === '/settings/preferences',
+    ),
   ];
 
   if (!readonly) {
@@ -184,10 +189,14 @@ const SettingsMenu = () => {
   }
 
   if (billingLink) {
-    primaryItems.push(buildItem(t('userBilling'), billingLink, <PaymentIcon />, false, { external: true }));
+    primaryItems.push(
+      buildItem(t('userBilling'), billingLink, <PaymentIcon />, false, { external: true }),
+    );
   }
   if (supportLink) {
-    primaryItems.push(buildItem(t('settingsSupport'), supportLink, <HelpIcon />, false, { external: true }));
+    primaryItems.push(
+      buildItem(t('settingsSupport'), supportLink, <HelpIcon />, false, { external: true }),
+    );
   }
 
   const managerItems = [];
@@ -215,7 +224,8 @@ const SettingsMenu = () => {
         t('settingsUsers'),
         '/settings/users',
         <PeopleIcon />,
-        location.pathname.startsWith('/settings/user') && location.pathname !== `/settings/user/${userId}`,
+        location.pathname.startsWith('/settings/user') &&
+          location.pathname !== `/settings/user/${userId}`,
       ),
     );
   }

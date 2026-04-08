@@ -7,6 +7,8 @@ import {
   Typography,
   Container,
   Button,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useTranslation } from '../common/components/LocalizationProvider';
@@ -26,6 +28,8 @@ const CommandDevicePage = () => {
 
   const [savedId, setSavedId] = useState(0);
   const [item, setItem] = useState({});
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [statusText, setStatusText] = useState();
 
   const handleSend = useCatch(async () => {
     let command;
@@ -38,12 +42,18 @@ const CommandDevicePage = () => {
 
     command.deviceId = parseInt(id, 10);
 
-    await fetchOrThrow('/api/commands/send', {
+    const response = await fetchOrThrow('/api/commands/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(command),
     });
-    navigate(-1);
+    
+    if (response.ok) {
+      setStatusText(`${response.status} ${response.statusText} ${command.type} ${ response.status === 202 ? t('commandQueued') : t('commandSent') }`);
+      setOpenSnackbar(true);
+    } else {
+      throw Error(await response.text());
+    }
   });
 
   const validate = () => savedId || (item && item.type);
@@ -79,6 +89,16 @@ const CommandDevicePage = () => {
           >
             {t('commandSend')}
           </Button>
+          <Snackbar
+            open={openSnackbar}
+            autoHideDuration={8000} 
+            onClose={() => navigate(-1)}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          >
+            <Alert onClose={() => navigate(-1)} severity="info">
+              {statusText}
+            </Alert>
+          </Snackbar>
         </div>
       </Container>
     </PageLayout>

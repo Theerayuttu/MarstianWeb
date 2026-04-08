@@ -78,7 +78,7 @@ const MaintenacesPage = () => {
   return (
     <PageLayout menu={<SettingsMenu />} breadcrumbs={['settingsTitle', 'sharedMaintenance']}>
       <SearchHeader keyword={searchKeyword} setKeyword={setSearchKeyword} />
-      <Table className={classes.table}>
+      <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
             <TableCell>{t('sharedName')}</TableCell>

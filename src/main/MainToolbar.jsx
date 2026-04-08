@@ -32,7 +32,6 @@ import { useDeviceReadonly } from '../common/util/permissions';
 import DeviceRow from './DeviceRow';
 import { layoutPalette } from '../common/theme/layoutTokens';
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const useStyles = makeStyles()((theme) => ({
   toolbar: {
@@ -82,7 +81,6 @@ const MainToolbar = ({
   filterMap,
   setFilterMap,
   onEventsClick,
-  onLogout,
 }) => {
   const { classes } = useStyles();
   const theme = useTheme();
@@ -251,20 +249,20 @@ const MainToolbar = ({
         </div>
       </Popover>
       {desktop && (
-      <Box className={classes.rightSection}>
-        <Tooltip title={t('reportEvents')} arrow>
-          <IconButton edge="end" onClick={onEventsClick}>
-            <Badge color="error" badgeContent={events.length} max={99}>
-              <CircleNotificationsIcon />
-            </Badge>
-          </IconButton>
-        </Tooltip>
-        {/* <Tooltip title={t('loginLogout')} arrow>
+        <Box className={classes.rightSection}>
+          <Tooltip title={t('reportEvents')} arrow>
+            <IconButton edge="end" onClick={onEventsClick}>
+              <Badge color="error" badgeContent={events.length} max={99}>
+                <CircleNotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+          {/* <Tooltip title={t('loginLogout')} arrow>
           <IconButton edge="end" onClick={onLogout}>
             <ExitToAppIcon />
           </IconButton>
         </Tooltip> */}
-      </Box>
+        </Box>
       )}
     </Toolbar>
   );

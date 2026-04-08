@@ -107,7 +107,7 @@ const CalendarLine = ({ handleSubmit, dayslist = 4 }) => {
             <Button
               key={date.format('YYYY-MM-DD')}
               variant={selected ? 'contained' : 'outlined'}
-              color={selected ? 'warning' : 'primary'}
+              color="primary"
               className={classes.dateButton}
               onClick={() => onSelectDate(date)}
             >

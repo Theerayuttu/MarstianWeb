@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, TextField, Typography, Snackbar, IconButton } from '@mui/material';
+import { Button, TextField, Typography, Snackbar, IconButton, InputAdornment } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { useNavigate } from 'react-router-dom';
 import LoginLayout from './LoginLayout';
@@ -10,6 +10,8 @@ import { useCatch, useEffectAsync } from '../reactHelper';
 import { sessionActions } from '../store';
 import BackIcon from '../common/components/BackIcon';
 import fetchOrThrow from '../common/util/fetchOrThrow';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -43,6 +45,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [totpKey, setTotpKey] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffectAsync(async () => {
     if (totpForce) {
@@ -97,9 +100,24 @@ const RegisterPage = () => {
           label={t('userPassword')}
           name="password"
           value={password}
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           autoComplete="current-password"
           onChange={(event) => setPassword(event.target.value)}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    size="small"
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            },
+          }}
         />
         {totpForce && (
           <TextField

@@ -20,7 +20,6 @@ import CountryFlag from 'react-country-flag';
 import { makeStyles } from 'tss-react/mui';
 import CloseIcon from '@mui/icons-material/Close';
 import VpnLockIcon from '@mui/icons-material/VpnLock';
-import QrCode2Icon from '@mui/icons-material/QrCode2';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,7 +33,6 @@ import {
   nativeEnvironment,
   nativePostMessage,
 } from '../common/components/NativeInterface';
-import LogoImage from './LogoImage';
 import { useCatch } from '../reactHelper';
 import QrCodeDialog from '../common/components/QrCodeDialog';
 import fetchOrThrow from '../common/util/fetchOrThrow';
@@ -302,7 +300,9 @@ const LoginPage = () => {
           {!openIdForced && (
             <Stack spacing={2.5} mt={1}>
               <div className={classes.formControl}>
-                <Typography className={classes.inputLabel}>{t('userEmail').toUpperCase()}</Typography>
+                <Typography className={classes.inputLabel}>
+                  {t('userEmail').toUpperCase()}
+                </Typography>
                 <TextField
                   required
                   error={failed}
@@ -316,7 +316,9 @@ const LoginPage = () => {
                 />
               </div>
               <div className={classes.formControl}>
-                <Typography className={classes.inputLabel}>{t('userPassword').toUpperCase()}</Typography>
+                <Typography className={classes.inputLabel}>
+                  {t('userPassword').toUpperCase()}
+                </Typography>
                 <TextField
                   required
                   error={failed}
@@ -362,13 +364,13 @@ const LoginPage = () => {
               )}
               <div className={classes.rememberRow}>
                 <FormControlLabel
-                  control={(
+                  control={
                     <Checkbox
                       checked={remember}
                       onChange={(e) => setRemember(e.target.checked)}
                       size="small"
                     />
-                  )}
+                  }
                   label="Remember Me"
                 />
                 {emailEnabled && (

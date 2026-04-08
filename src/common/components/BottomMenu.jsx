@@ -14,9 +14,7 @@ import { makeStyles } from 'tss-react/mui';
 import { layoutPalette } from '../theme/layoutTokens';
 
 import AssessmentRounded from '@mui/icons-material/AssessmentRounded';
-import DescriptionIcon from '@mui/icons-material/Description';
 import SettingsIcon from '@mui/icons-material/Settings';
-import MapIcon from '@mui/icons-material/Map';
 import ExploreIcon from '@mui/icons-material/Explore';
 import PersonIcon from '@mui/icons-material/Person';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';

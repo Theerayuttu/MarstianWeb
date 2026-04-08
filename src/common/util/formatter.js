@@ -97,7 +97,7 @@ export const formatVolume = (value, unit, t) =>
 export const formatNumericHours = (value, t, hformat) => {
   const hours = Math.floor(value / 3600000);
   const minutes = Math.floor((value % 3600000) / 60000);
-  
+
   switch (hformat) {
     case 'h':
       return `${(value / 3600000).toFixed(2)}`;
@@ -106,8 +106,6 @@ export const formatNumericHours = (value, t, hformat) => {
     default:
       return `${hours} ${t('sharedHourAbbreviation')} ${minutes} ${t('sharedMinuteAbbreviation')}`;
   }
-
-  
 };
 
 export const formatCoordinate = (key, value, unit) => {
