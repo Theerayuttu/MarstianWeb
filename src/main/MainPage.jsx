@@ -10,8 +10,14 @@ import {
   Divider,
   Badge,
   Box,
-  Chip,
   IconButton,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Chip,
+  CircularProgress,
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { useTheme } from '@mui/material/styles';
@@ -28,6 +34,7 @@ import MainToolbar from './MainToolbar';
 import MainMap from './MainMap';
 import { useAttributePreference } from '../common/util/preferences';
 import { layoutPalette } from '../common/theme/layoutTokens';
+import dayjs from 'dayjs';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExploreIcon from '@mui/icons-material/Explore';
 import PersonIcon from '@mui/icons-material/Person';
@@ -39,6 +46,8 @@ import MenuRounded from '@mui/icons-material/MenuRounded';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import { useRestriction } from '../common/util/permissions';
 import { nativePostMessage } from '../common/components/NativeInterface';
+import fetchOrThrow from '../common/util/fetchOrThrow';
+import { formatDistance } from '../common/util/formatter';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -167,6 +176,10 @@ const useStyles = makeStyles()((theme) => ({
   content: {
     flex: 1,
     minHeight: 0,
+    padding: theme.spacing(2),
+  },
+  contentMap: {
+    padding: 0,
   },
   mapSection: {
     position: 'relative',
@@ -177,21 +190,52 @@ const useStyles = makeStyles()((theme) => ({
     boxShadow: '0 40px 80px rgba(7, 20, 45, 0.10)',
     overflow: 'hidden',
   },
+  dashboardGrid: {
+    display: 'grid',
+    gridTemplateColumns: '2fr 1fr',
+    gap: theme.spacing(2),
+  },
+  mapCard: {
+    position: 'relative',
+    minHeight: 500,
+    borderRadius: 12,
+    border: '1px solid #d6deea',
+    overflow: 'hidden',
+  },
   mapSurface: {
     width: '100%',
     height: '100%',
   },
-  liveChip: {
+  liveBadge: {
     position: 'absolute',
-    top: theme.spacing(3),
-    left: theme.spacing(3),
-    backgroundColor: '#fff',
+    top: theme.spacing(1),
+    left: theme.spacing(1),
+    zIndex: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    borderRadius: 999,
     fontWeight: 700,
+    fontSize: '0.78rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.8),
+    padding: theme.spacing(0.5, 1),
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    backgroundColor: '#00C48C',
+  },
+  metricsStack: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
   },
   devicePanel: {
     position: 'absolute',
     left: theme.spacing(0),
     top: theme.spacing(0),
+    zIndex: 3,
     width: theme.dimensions.drawerWidthDesktop,
     height: '100%',
     display: 'flex',
@@ -205,6 +249,53 @@ const useStyles = makeStyles()((theme) => ({
     opacity: 0,
     pointerEvents: 'none',
     transform: 'translateY(12px)',
+  },
+  totalsCard: {
+    padding: theme.spacing(2.5),
+    background: 'linear-gradient(160deg, #001f52 0%, #07285f 100%)',
+    color: '#f5f8ff',
+    borderRadius: 10,
+  },
+  totalsHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: theme.spacing(2),
+  },
+  totalsGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: theme.spacing(1.2),
+  },
+  totalMetricTile: {
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    padding: theme.spacing(1.5),
+  },
+  avgCard: {
+    borderRadius: 10,
+    border: '1px solid #d6deea',
+    padding: theme.spacing(2.5),
+    backgroundColor: '#f9fbff',
+    minHeight: 170,
+  },
+  activeCard: {
+    marginTop: theme.spacing(2),
+    borderRadius: 12,
+    border: '1px solid #dce3ef',
+    overflow: 'hidden',
+  },
+  activeCardHeader: {
+    padding: theme.spacing(2.5, 3),
+    borderBottom: '1px solid #e5ebf4',
+    backgroundColor: '#f7f9fd',
+  },
+  tableHeadCell: {
+    fontWeight: 700,
+    fontSize: '0.76rem',
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+    color: '#6f7f95',
   },
   sidebarDivider: {
     borderColor: 'rgba(255,255,255,0.12)',
@@ -273,9 +364,18 @@ const useStyles = makeStyles()((theme) => ({
     topBar: {
       borderRadius: 20,
     },
+    content: {
+      padding: theme.spacing(1.5, 0.5),
+    },
     mapSection: {
       borderRadius: 20,
       minHeight: 420,
+    },
+    dashboardGrid: {
+      gridTemplateColumns: '1fr',
+    },
+    mapCard: {
+      minHeight: 340,
     },
     devicePanel: {
       position: 'static',
@@ -286,6 +386,13 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
 }));
+
+const MS_PER_HOUR = 3600000;
+
+const isDeviceActive = (summary) =>
+  ['distance', 'engineHours', 'spentFuel', 'startHours', 'endHours'].some(
+    (key) => Number(summary?.[key] || 0) > 0,
+  );
 
 const MainPage = () => {
   const { classes, cx } = useStyles();
@@ -298,6 +405,7 @@ const MainPage = () => {
   const desktop = useMediaQuery(theme.breakpoints.up('md'));
 
   const mapOnSelect = useAttributePreference('mapOnSelect', true);
+  const distanceUnit = useAttributePreference('distanceUnit');
 
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
   const positions = useSelector((state) => state.session.positions);
@@ -323,6 +431,10 @@ const MainPage = () => {
   const [devicesOpen, setDevicesOpen] = useState(desktop);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [summaryItems, setSummaryItems] = useState([]);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
+  const isDashboardPage = location.pathname === '/dashboard';
 
   const onEventsClick = useCallback(() => setEventsOpen(true), [setEventsOpen]);
 
@@ -343,6 +455,43 @@ const MainPage = () => {
     //}
   }, [desktop]);
 
+  useEffect(() => {
+    if (!isDashboardPage) {
+      setSummaryItems([]);
+      setSummaryLoading(false);
+      return () => {};
+    }
+
+    let cancelled = false;
+
+    const loadSummary = async () => {
+      const from = dayjs().startOf('day').toISOString();
+      const to = dayjs().endOf('day').toISOString();
+      const query = new URLSearchParams({ from, to, daily: 'true' });
+
+      setSummaryLoading(true);
+      try {
+        const response = await fetchOrThrow(`/api/reports/summary?${query.toString()}`, {
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!cancelled) {
+          setSummaryItems(await response.json());
+        }
+      } finally {
+        if (!cancelled) {
+          setSummaryLoading(false);
+        }
+      }
+    };
+
+    loadSummary();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isDashboardPage]);
+
   useFilter(
     keyword,
     filter,
@@ -362,6 +511,9 @@ const MainPage = () => {
     }
     if (location.pathname.startsWith('/reports')) {
       return 'reports';
+    }
+    if (location.pathname === '/dashboard') {
+      return 'dashboard';
     }
     if (location.pathname === '/') {
       return 'map';
@@ -402,6 +554,9 @@ const MainPage = () => {
   const handleSelection = useCallback(
     (value) => {
       switch (value) {
+        case 'dashboard':
+          navigate('/dashboard');
+          break;
         case 'map':
           navigate('/');
           break;
@@ -441,7 +596,7 @@ const MainPage = () => {
 
   const navItems = useMemo(() => {
     const items = [
-      { key: 'dashboard', label: 'Dashboard', icon: <DashboardRounded />, disabled: true },
+      { key: 'dashboard', label: 'Dashboard', icon: <DashboardRounded /> },
       { key: 'map', label: t('mapTitle'), icon: <ExploreIcon /> },
     ];
 
@@ -461,6 +616,127 @@ const MainPage = () => {
 
   const liveActiveCount =
     filteredPositions.length || filteredDevices.length || Object.keys(devices || {}).length || 0;
+
+  const devicesList = useMemo(() => Object.values(devices || {}), [devices]);
+
+  const summaryByDeviceId = useMemo(() => {
+    const mapped = {};
+    summaryItems.forEach((item) => {
+      if (item?.deviceId && !mapped[item.deviceId]) {
+        mapped[item.deviceId] = item;
+      }
+    });
+    return mapped;
+  }, [summaryItems]);
+
+  const summaryRows = useMemo(() => Object.values(summaryByDeviceId), [summaryByDeviceId]);
+
+  const activeDevices = useMemo(
+    () =>
+      summaryRows
+        .filter(isDeviceActive)
+        .map((summary) => {
+          const device = devices[summary.deviceId];
+          if (!device) {
+            return null;
+          }
+          return {
+            device,
+            summary,
+            position: positions[summary.deviceId],
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => Number(b.summary.engineHours || 0) - Number(a.summary.engineHours || 0)),
+    [devices, positions, summaryRows],
+  );
+
+  const counts = useMemo(() => {
+    const total = devicesList.length;
+    const online = devicesList.filter((device) => device.status === 'online').length;
+    const offline = devicesList.filter((device) => device.status === 'offline').length;
+    const working = activeDevices.filter(
+      ({ position, summary }) =>
+        position?.attributes?.ignition || Number(summary.engineHours || 0) > 0,
+    ).length;
+    const parked = Math.max(activeDevices.length - working, 0);
+
+    return {
+      total,
+      online,
+      offline,
+      working,
+      parked,
+    };
+  }, [activeDevices, devicesList]);
+
+  const averageWorkingHours = useMemo(() => {
+    const nonZeroEngineHours = summaryRows
+      .map((item) => Number(item.engineHours || 0))
+      .filter((value) => value !== 0);
+
+    if (!nonZeroEngineHours.length) {
+      return 0;
+    }
+
+    const totalEngineHours = nonZeroEngineHours.reduce(
+      (accumulator, value) => accumulator + value,
+      0,
+    );
+    return totalEngineHours / nonZeroEngineHours.length / MS_PER_HOUR;
+  }, [summaryRows]);
+
+  const activeSummary = useMemo(() => {
+    const activeCount = activeDevices.length;
+    const distanceSum = activeDevices.reduce(
+      (accumulator, item) => accumulator + Number(item.summary.distance || 0),
+      0,
+    );
+    const startOdometerSum = activeDevices.reduce(
+      (accumulator, item) => accumulator + Number(item.summary.startOdometer || 0),
+      0,
+    );
+    const endOdometerSum = activeDevices.reduce(
+      (accumulator, item) => accumulator + Number(item.summary.endOdometer || 0),
+      0,
+    );
+    const engineHoursSum = activeDevices.reduce(
+      (accumulator, item) => accumulator + Number(item.summary.engineHours || 0),
+      0,
+    );
+    const nonZeroSpentFuel = activeDevices
+      .map((item) => Number(item.summary.spentFuel || 0))
+      .filter((value) => value !== 0);
+    const spentFuelAvg =
+      nonZeroSpentFuel.length > 0
+        ? nonZeroSpentFuel.reduce((accumulator, value) => accumulator + value, 0) /
+          nonZeroSpentFuel.length
+        : 0;
+    const maxSpeedMax = activeDevices.reduce(
+      (maxValue, item) => Math.max(maxValue, Number(item.summary.maxSpeed || 0)),
+      0,
+    );
+    const nonZeroAverageSpeed = activeDevices
+      .map((item) => Number(item.summary.averageSpeed || 0))
+      .filter((value) => value !== 0);
+    const averageSpeedAvg =
+      nonZeroAverageSpeed.length > 0
+        ? nonZeroAverageSpeed.reduce((accumulator, value) => accumulator + value, 0) /
+          nonZeroAverageSpeed.length
+        : 0;
+
+    return {
+      activeCount,
+      distanceSum,
+      startOdometerSum,
+      endOdometerSum,
+      engineHoursSum,
+      spentFuelAvg,
+      maxSpeedMax,
+      averageSpeedAvg,
+    };
+  }, [activeDevices]);
+
   const drawerWidth = desktop ? (sidebarCollapsed ? '56px' : '240px') : 0;
 
   return (
@@ -565,32 +841,170 @@ const MainPage = () => {
             />
           </div>
         </Paper>
-        <div className={classes.content}>
-          <div className={classes.mapSection}>
-            <div className={classes.mapSurface}>
-              <MainMap
-                filteredPositions={filteredPositions}
-                selectedPosition={selectedPosition}
-                onEventsClick={onEventsClick}
-              />
-            </div>
-            <Chip
-              className={classes.liveChip}
-              label={`LIVE: ${liveActiveCount} Devices`}
-              icon={
-                <Box
-                  component="span"
-                  sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#00C48C' }}
+        <div className={cx(classes.content, !isDashboardPage && classes.contentMap)}>
+          {!isDashboardPage ? (
+            <div className={classes.mapSection}>
+              <div className={classes.mapSurface}>
+                <MainMap
+                  filteredPositions={filteredPositions}
+                  selectedPosition={selectedPosition}
+                  onEventsClick={onEventsClick}
                 />
-              }
-            />
-            <Paper
-              elevation={3}
-              className={cx(classes.devicePanel, { [classes.devicePanelHidden]: !devicesOpen })}
-            >
-              <DeviceList devices={filteredDevices} />
-            </Paper>
-          </div>
+              </div>
+              <Chip
+                className={classes.liveBadge}
+                label={`LIVE: ${liveActiveCount} Devices`}
+                icon={<span className={classes.liveDot} />}
+              />
+              <Paper
+                elevation={3}
+                className={cx(classes.devicePanel, { [classes.devicePanelHidden]: !devicesOpen })}
+              >
+                <DeviceList devices={filteredDevices} />
+              </Paper>
+            </div>
+          ) : (
+            <>
+              <div className={classes.dashboardGrid}>
+                <Paper elevation={0} className={classes.mapCard}>
+                  <div className={classes.liveBadge}>
+                    <span className={classes.liveDot} /> LIVE: {liveActiveCount} Devices
+                  </div>
+                  <div className={classes.mapSurface}>
+                    <MainMap
+                      filteredPositions={filteredPositions}
+                      selectedPosition={selectedPosition}
+                      onEventsClick={onEventsClick}
+                    />
+                  </div>
+                </Paper>
+
+                <div className={classes.metricsStack}>
+                  <Paper elevation={0} className={classes.totalsCard}>
+                    <div className={classes.totalsHeader}>
+                      <div>
+                        <Typography variant="overline" sx={{ color: 'rgba(220,231,255,0.8)' }}>
+                          Total Devices
+                        </Typography>
+                        <Typography variant="h3" fontWeight={700}>
+                          {counts.total}
+                        </Typography>
+                      </div>
+                      <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.14)', width: 42, height: 42 }}>
+                        <DashboardRounded />
+                      </Avatar>
+                    </div>
+                    <div className={classes.totalsGrid}>
+                      <div className={classes.totalMetricTile}>
+                        <Typography variant="caption" color="rgba(220,231,255,0.7)">
+                          Online
+                        </Typography>
+                        <Typography variant="h5" fontWeight={700} color="#7cf5c4">
+                          {counts.online}
+                        </Typography>
+                      </div>
+                      <div className={classes.totalMetricTile}>
+                        <Typography variant="caption" color="rgba(220,231,255,0.7)">
+                          Offline
+                        </Typography>
+                        <Typography variant="h5" fontWeight={700} color="#ff7d7d">
+                          {counts.offline}
+                        </Typography>
+                      </div>
+                      <div className={classes.totalMetricTile}>
+                        <Typography variant="caption" color="rgba(220,231,255,0.7)">
+                          Working
+                        </Typography>
+                        <Typography variant="h5" fontWeight={700} color="#7cf5c4">
+                          {counts.working}
+                        </Typography>
+                      </div>
+                      <div className={classes.totalMetricTile}>
+                        <Typography variant="caption" color="rgba(220,231,255,0.7)">
+                          Parked
+                        </Typography>
+                        <Typography variant="h5" fontWeight={700}>
+                          {counts.parked}
+                        </Typography>
+                      </div>
+                    </div>
+                  </Paper>
+
+                  <Paper elevation={0} className={classes.avgCard}>
+                    <Typography variant="overline" color="text.secondary">
+                      AVG. Working Hours
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8 }}>
+                      <Typography variant="h3" fontWeight={700} color="#041c4d">
+                        {averageWorkingHours.toFixed(1)}
+                      </Typography>
+                      <Typography variant="h6" color="text.secondary">
+                        hrs/day
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                      Based on current day summary from all devices
+                    </Typography>
+                  </Paper>
+                </div>
+              </div>
+
+              <Paper elevation={0} className={classes.activeCard}>
+                <div className={classes.activeCardHeader}>
+                  <Typography variant="h5" fontWeight={700} color="#0a2051">
+                    Active Devices
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Active status of tracker modules in the field
+                  </Typography>
+                </div>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell className={classes.tableHeadCell}>Active Devices</TableCell>
+                      <TableCell className={classes.tableHeadCell}>Distance (Sum)</TableCell>
+                      <TableCell className={classes.tableHeadCell}>Start Odometer (Sum)</TableCell>
+                      <TableCell className={classes.tableHeadCell}>End Odometer (Sum)</TableCell>
+                      <TableCell className={classes.tableHeadCell}>Engine Hours (Sum)</TableCell>
+                      <TableCell className={classes.tableHeadCell}>maxSpeed (Max)</TableCell>
+                      <TableCell className={classes.tableHeadCell}>averageSpeed (Avg.)</TableCell>
+                      <TableCell className={classes.tableHeadCell}>Spent Fuel (Avg.)</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {summaryLoading && (
+                      <TableRow>
+                        <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                          <CircularProgress size={26} />
+                        </TableCell>
+                      </TableRow>
+                    )}
+
+                    {!summaryLoading && (
+                      <TableRow>
+                        <TableCell>{activeSummary.activeCount}</TableCell>
+                        <TableCell>
+                          {formatDistance(activeSummary.distanceSum, distanceUnit, t)}
+                        </TableCell>
+                        <TableCell>
+                          {formatDistance(activeSummary.startOdometerSum, distanceUnit, t)}
+                        </TableCell>
+                        <TableCell>
+                          {formatDistance(activeSummary.endOdometerSum, distanceUnit, t)}
+                        </TableCell>
+                        <TableCell>
+                          {(activeSummary.engineHoursSum / MS_PER_HOUR).toFixed(1)} h
+                        </TableCell>
+                        <TableCell>{activeSummary.maxSpeedMax.toFixed(1)}</TableCell>
+                        <TableCell>{activeSummary.averageSpeedAvg.toFixed(1)}</TableCell>
+                        <TableCell>{activeSummary.spentFuelAvg.toFixed(1)}</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </Paper>
+            </>
+          )}
         </div>
       </div>
       <EventsDrawer open={eventsOpen} onClose={() => setEventsOpen(false)} />

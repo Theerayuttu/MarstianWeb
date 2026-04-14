@@ -121,6 +121,7 @@ const Navigation = () => {
       <Route path="/change-server" element={<ChangeServerPage />} />
       <Route path="/" element={<App />}>
         <Route index element={<MainPage />} />
+        <Route path="dashboard" element={<MainPage />} />
 
         <Route path="position/:id" element={<PositionPage />} />
         <Route path="positionlive/:id" element={<PositionLivePage />} />
