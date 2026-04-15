@@ -112,7 +112,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   footer: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     flexWrap: 'wrap',
     gap: theme.spacing(1.5),
     marginTop: theme.spacing(6),
@@ -129,10 +129,12 @@ const useStyles = makeStyles()((theme) => ({
     fontSize: '0.85rem',
     color: '#5E6470',
   },
-  rememberRow: {
+  resetPassword: {
     display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    fontSize: '0.85rem',
+    color: '#5E6470',
   },
   link: {
     cursor: 'pointer',
@@ -362,17 +364,7 @@ const LoginPage = () => {
                   onChange={(e) => setCode(e.target.value)}
                 />
               )}
-              <div className={classes.rememberRow}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={remember}
-                      onChange={(e) => setRemember(e.target.checked)}
-                      size="small"
-                    />
-                  }
-                  label="Remember Me"
-                />
+              <div className={classes.resetPassword}>
                 {emailEnabled && (
                   <Link
                     onClick={() => navigate('/reset-password')}
@@ -420,10 +412,6 @@ const LoginPage = () => {
         <Typography variant="body2">
           © 2024 MarsX Things. All rights reserved. V{versionApp}
         </Typography>
-        {/* <div className={classes.footerLinks}>
-          <Link underline="none" color="inherit" className={classes.link}>Privacy Policy</Link>
-          <Link underline="none" color="inherit" className={classes.link}>Terms of Service</Link>
-        </div> */}
       </footer>
 
       <QrCodeDialog open={showQr} onClose={() => setShowQr(false)} />

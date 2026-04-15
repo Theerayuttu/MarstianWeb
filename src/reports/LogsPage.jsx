@@ -11,8 +11,8 @@ import {
   Tooltip,
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import ReportsMenu from './components/ReportsMenu';
@@ -60,7 +60,7 @@ const LogsPage = () => {
               <TableCell className={classes.columnAction} padding="none">
                 {item.deviceId ? (
                   <IconButton color="success" size="small" disabled>
-                    <CheckCircleOutlineIcon fontSize="small" />
+                    <CheckCircleOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : (
                   <Tooltip title={t('loginRegister')}>
@@ -69,7 +69,7 @@ const LogsPage = () => {
                       size="small"
                       onClick={() => registerDevice(item.uniqueId)}
                     >
-                      <HelpOutlineIcon fontSize="small" />
+                      <HelpOutlinedIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 )}

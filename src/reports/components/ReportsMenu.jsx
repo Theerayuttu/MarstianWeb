@@ -88,44 +88,83 @@ const ReportsMenu = () => {
   };
 
   const primaryItems = [
-    { title: t('reportCombined'), link: buildLink('/reports/combined'), icon: <StarIcon /> },
-    { title: t('reportPositions'), link: buildLink('/reports/route'), icon: <TimelineIcon /> },
+    {
+      title: t('reportCombined'),
+      path: '/reports/combined',
+      link: buildLink('/reports/combined'),
+      icon: <StarIcon />,
+    },
+    {
+      title: t('reportPositions'),
+      path: '/reports/route',
+      link: buildLink('/reports/route'),
+      icon: <TimelineIcon />,
+    },
     {
       title: t('reportEvents'),
+      path: '/reports/events',
       link: buildLink('/reports/events'),
       icon: <NotificationsActiveIcon />,
     },
-    { title: t('sharedGeofences'), link: buildLink('/reports/geofences'), icon: <PlaceIcon /> },
-    { title: t('reportTrips'), link: buildLink('/reports/trips'), icon: <PlayCircleFilledIcon /> },
-    { title: t('reportStops'), link: buildLink('/reports/stops'), icon: <PauseCircleFilledIcon /> },
+    {
+      title: t('sharedGeofences'),
+      path: '/reports/geofences',
+      link: buildLink('/reports/geofences'),
+      icon: <PlaceIcon />,
+    },
+    {
+      title: t('reportTrips'),
+      path: '/reports/trips',
+      link: buildLink('/reports/trips'),
+      icon: <PlayCircleFilledIcon />,
+    },
+    {
+      title: t('reportStops'),
+      path: '/reports/stops',
+      link: buildLink('/reports/stops'),
+      icon: <PauseCircleFilledIcon />,
+    },
     {
       title: t('reportSummary'),
+      path: '/reports/summary',
       link: buildLink('/reports/summary'),
       icon: <FormatListBulletedIcon />,
     },
-    { title: t('reportChart'), link: buildLink('/reports/chart'), icon: <TrendingUpIcon /> },
-    { title: t('reportReplay'), link: buildLink('/replay'), icon: <RouteIcon /> },
+    {
+      title: t('reportChart'),
+      path: '/reports/chart',
+      link: buildLink('/reports/chart'),
+      icon: <TrendingUpIcon />,
+    },
+    { title: t('reportReplay'), path: '/replay', link: buildLink('/replay'), icon: <RouteIcon /> },
   ];
 
   const secondaryItems = [
-    { title: t('sharedLogs'), link: '/reports/logs', icon: <NotesIcon /> },
+    { title: t('sharedLogs'), path: '/reports/logs', link: '/reports/logs', icon: <NotesIcon /> },
     !readonly && {
       title: t('reportScheduled'),
+      path: '/reports/scheduled',
       link: '/reports/scheduled',
       icon: <EventRepeatIcon />,
     },
     admin && {
       title: t('statisticsTitle'),
+      path: '/reports/statistics',
       link: '/reports/statistics',
       icon: <BarChartIcon />,
     },
-    admin && { title: t('reportAudit'), link: '/reports/audit', icon: <VerifiedUserIcon /> },
+    admin && {
+      title: t('reportAudit'),
+      path: '/reports/audit',
+      link: '/reports/audit',
+      icon: <VerifiedUserIcon />,
+    },
   ].filter(Boolean);
 
   const renderList = (items) => (
     <List className={classes.navList} disablePadding>
       {items.map((item) => {
-        const selected = location.pathname === item.link;
+        const selected = location.pathname === item.path;
         return (
           <ListItemButton
             key={item.link}

@@ -413,6 +413,8 @@ const MainPage = () => {
   const user = useSelector((state) => state.session.user);
   const socket = useSelector((state) => state.session.socket);
 
+  const userDashboard = user?.attributes?.useDashboard;
+
   const [filteredPositions, setFilteredPositions] = useState([]);
   const selectedPosition = filteredPositions.find(
     (position) => selectedDeviceId && position.deviceId === selectedDeviceId,
@@ -595,10 +597,11 @@ const MainPage = () => {
   );
 
   const navItems = useMemo(() => {
-    const items = [
-      { key: 'dashboard', label: 'Dashboard', icon: <DashboardRounded /> },
-      { key: 'map', label: t('mapTitle'), icon: <ExploreIcon /> },
-    ];
+    const items = [{ key: 'map', label: t('mapTitle'), icon: <ExploreIcon /> }];
+
+    if (userDashboard === true || userDashboard === 'true') {
+      items.unshift({ key: 'dashboard', label: 'Dashboard', icon: <DashboardRounded /> });
+    }
 
     if (!disableReports) {
       items.push({ key: 'reports', label: t('reportTitle'), icon: <AssessmentRounded /> });
@@ -612,7 +615,7 @@ const MainPage = () => {
     );
 
     return items;
-  }, [disableReports, readonly, t]);
+  }, [disableReports, readonly, t, userDashboard]);
 
   const liveActiveCount =
     filteredPositions.length || filteredDevices.length || Object.keys(devices || {}).length || 0;

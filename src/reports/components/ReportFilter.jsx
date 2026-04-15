@@ -17,6 +17,7 @@ import SplitButton from '../../common/components/SplitButton';
 import SelectField from '../../common/components/SelectField';
 import { useRestriction } from '../../common/util/permissions';
 import { deviceEquality } from '../../common/util/deviceEquality';
+import usePersistedState from '../../common/util/usePersistedState';
 
 export const updateReportParams = (searchParams, setSearchParams, key, values) => {
   const newParams = new URLSearchParams(searchParams);
@@ -36,6 +37,7 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
   const readonly = useRestriction('readonly');
 
   const devices = useSelector((state) => state.devices.items, deviceEquality(['id', 'name']));
+  const selectedDeviceId = useSelector((state) => state.devices.selectedId);
   const groups = useSelector((state) => state.groups.items);
   const deviceList = useMemo(
     () => Object.values(devices).sort((a, b) => a.name.localeCompare(b.name)),
@@ -50,11 +52,14 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
   const groupIds = useMemo(() => searchParams.getAll('groupId').map(Number), [searchParams]);
   const from = searchParams.get('from');
   const to = searchParams.get('to');
-  const [period, setPeriod] = useState('today');
-  const [customFrom, setCustomFrom] = useState(
-    dayjs().subtract(1, 'hour').locale('en').format('YYYY-MM-DDTHH:mm'),
+  const [period, setPeriod] = usePersistedState('reportPeriod', 'today');
+  const defaultCustomFrom = useMemo(
+    () => dayjs().subtract(1, 'hour').locale('en').format('YYYY-MM-DDTHH:mm'),
+    [],
   );
-  const [customTo, setCustomTo] = useState(dayjs().locale('en').format('YYYY-MM-DDTHH:mm'));
+  const defaultCustomTo = useMemo(() => dayjs().locale('en').format('YYYY-MM-DDTHH:mm'), []);
+  const [customFrom, setCustomFrom] = usePersistedState('reportCustomFrom', defaultCustomFrom);
+  const [customTo, setCustomTo] = usePersistedState('reportCustomTo', defaultCustomTo);
   const [selectedOption, setSelectedOption] = useState('json');
 
   const [description, setDescription] = useState();
@@ -92,6 +97,26 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
       onShow({ deviceIds, groupIds, from, to });
     }
   }, [deviceIds, groupIds, from, to]);
+
+  useEffect(() => {
+    if (deviceType === 'none' || deviceIds.length || groupIds.length || !selectedDeviceId) {
+      return;
+    }
+
+    if (devices[selectedDeviceId]) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.append('deviceId', selectedDeviceId);
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [
+    deviceType,
+    deviceIds.length,
+    groupIds.length,
+    selectedDeviceId,
+    devices,
+    searchParams,
+    setSearchParams,
+  ]);
 
   const showReport = () => {
     let selectedFrom;

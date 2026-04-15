@@ -8,8 +8,8 @@ export default defineConfig(() => ({
   server: {
     port: 3000,
     proxy: {
-      '/api/socket': 'ws://ec2-18-143-114-161.ap-southeast-1.compute.amazonaws.com:8082', //http://ec2-18-143-114-161.ap-southeast-1.compute.amazonaws.com/
-      '/api': 'http://ec2-18-143-114-161.ap-southeast-1.compute.amazonaws.com:8082',
+      '/api/socket': 'ws://localhost:8082', //http://ec2-18-143-114-161.ap-southeast-1.compute.amazonaws.com/
+      '/api': 'http://localhost:8082',
     },
   },
   build: {

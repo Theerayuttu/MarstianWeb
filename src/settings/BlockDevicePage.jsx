@@ -20,7 +20,7 @@ import { useCatch } from '../reactHelper';
 import { useRestriction } from '../common/util/permissions';
 import useSettingsStyles from './common/useSettingsStyles';
 import BlockIcon from '@mui/icons-material/Block';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import fetchOrThrow from '../common/util/fetchOrThrow';
 
 
@@ -96,7 +96,7 @@ const BlockDevicePage = () => {
                 {t('commandBlock')}
               </Fab>
               <Fab variant="extended" color='success' onClick={() => handleBlock("engineResume")}>
-                <CheckCircleOutlineIcon sx={{ mr: 1 }} />
+                <CheckCircleOutlinedIcon sx={{ mr: 1 }} />
                 {t('commandUnBlock')}
               </Fab>
             </Box>
