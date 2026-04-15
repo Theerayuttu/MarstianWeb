@@ -1,6 +1,6 @@
 {
-  "name": "traccar",
-  "version": "6.12.2",
+  "name": "marstian",
+  "version": "6.12.3",
   "type": "module",
   "private": true,
   "dependencies": {
