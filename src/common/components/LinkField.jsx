@@ -90,7 +90,10 @@ const LinkField = ({
           <TextField
             {...params}
             label={label}
-            slotProps={{ inputLabel: { shrink: true } }}
+            InputLabelProps={{
+              ...params.InputLabelProps,
+              shrink: true,
+            }}
             placeholder={!active ? t('reportShow') : null}
           />
         )}
