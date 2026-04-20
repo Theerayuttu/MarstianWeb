@@ -11,7 +11,6 @@ import {
   Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { MuiFileInput } from 'mui-file-input';
 import EditItemView from './components/EditItemView';
 import EditAttributesAccordion from './components/EditAttributesAccordion';
 import SelectField from '../common/components/SelectField';
@@ -40,22 +39,6 @@ const DevicePage = () => {
 
   const [item, setItem] = useState(uniqueId ? { uniqueId } : null);
   const [showQr, setShowQr] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
-
-  const handleFileInput = useCatch(async (newFile) => {
-    setImageFile(newFile);
-    if (newFile && item?.id) {
-      const response = await fetchOrThrow(`/api/devices/${item.id}/image`, {
-        method: 'POST',
-        body: newFile,
-      });
-      setItem({ ...item, attributes: { ...item.attributes, deviceImage: await response.text() } });
-    } else if (!newFile) {
-      // eslint-disable-next-line no-unused-vars
-      const { deviceImage, ...remainingAttributes } = item.attributes || {};
-      setItem({ ...item, attributes: remainingAttributes });
-    }
-  });
 
   const validate = () => item && item.name && item.uniqueId;
 
@@ -158,21 +141,6 @@ const DevicePage = () => {
               </Button>
             </AccordionDetails>
           </Accordion>
-          {item.id && (
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="subtitle1">{t('attributeDeviceImage')}</Typography>
-              </AccordionSummary>
-              <AccordionDetails className={classes.details}>
-                <MuiFileInput
-                  placeholder={t('attributeDeviceImage')}
-                  value={imageFile}
-                  onChange={handleFileInput}
-                  inputProps={{ accept: 'image/*' }}
-                />
-              </AccordionDetails>
-            </Accordion>
-          )}
           <EditAttributesAccordion
             attributes={item.attributes}
             setAttributes={(attributes) => setItem({ ...item, attributes })}
