@@ -55,14 +55,27 @@ const DevicesPage = () => {
   const loadItems = async (offset) => {
     setLoading(true);
     try {
-      const query = new URLSearchParams({ all: showAll, limit: pageSize, offset });
-      if (searchKeyword) {
-        query.append('keyword', searchKeyword);
+      const trimmedKeyword = searchKeyword.trim();
+      const hasKeyword = Boolean(trimmedKeyword);
+      const isIdSearch = /^\d+$/.test(trimmedKeyword);
+
+      const query = new URLSearchParams({ all: showAll || hasKeyword });
+      if (!hasKeyword) {
+        query.append('limit', pageSize);
+        query.append('offset', offset);
+      } else if (!isIdSearch) {
+        query.append('keyword', trimmedKeyword);
       }
+
       const response = await fetchOrThrow(`/api/devices?${query.toString()}`);
-      const data = await response.json();
-      setItems((previous) => (offset ? [...previous, ...data] : data));
-      setHasMore(data.length >= pageSize);
+      let data = await response.json();
+
+      if (hasKeyword && isIdSearch) {
+        data = data.filter((item) => item.id.toString().includes(trimmedKeyword));
+      }
+
+      setItems((previous) => (offset && !hasKeyword ? [...previous, ...data] : data));
+      setHasMore(!hasKeyword && data.length >= pageSize);
     } finally {
       setLoading(false);
     }
@@ -77,6 +90,7 @@ const DevicesPage = () => {
 
   const handleExport = async () => {
     const data = items.map((item) => ({
+      ['ID']: item.id,
       [t('sharedName')]: item.name,
       [t('deviceIdentifier')]: item.uniqueId,
       [t('groupParent')]: item.groupId ? groups[item.groupId]?.name : null,
@@ -108,6 +122,7 @@ const DevicesPage = () => {
       <Table stickyHeader className={classes.table}>
         <TableHead>
           <TableRow>
+            <TableCell>{'ID'}</TableCell>
             <TableCell>{t('sharedName')}</TableCell>
             <TableCell>{t('deviceIdentifier')}</TableCell>
             <TableCell>{t('groupParent')}</TableCell>
@@ -123,6 +138,7 @@ const DevicesPage = () => {
         <TableBody>
           {items.map((item) => (
             <TableRow key={item.id}>
+              <TableCell>{item.id}</TableCell>
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.uniqueId}</TableCell>
               <TableCell>{item.groupId ? groups[item.groupId]?.name : null}</TableCell>
