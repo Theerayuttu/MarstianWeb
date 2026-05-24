@@ -34,6 +34,23 @@ export const useAsyncTask = (effect, deps) => {
   }, [...deps, dispatch]);
 };
 
+export const useEffectAsync = (effect, deps) => {
+  useEffect(() => {
+    let cleanup;
+    effect()
+      .then((result) => {
+        cleanup = result;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    return () => {
+      cleanup?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+};
+
 export const useCatch = (method) => {
   const dispatch = useDispatch();
   return (...parameters) => {
