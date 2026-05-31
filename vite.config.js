@@ -24,6 +24,7 @@ export default defineConfig(() => ({
       workbox: {
         navigateFallbackDenylist: [/^\/api/],
         globPatterns: ['**/*.{js,css,html,woff,woff2,mp3}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
         short_name: '${title}',

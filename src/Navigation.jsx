@@ -21,18 +21,12 @@ const NotificationPage = lazy(() => import('./settings/NotificationPage'));
 const GroupsPage = lazy(() => import('./settings/GroupsPage'));
 const GroupPage = lazy(() => import('./settings/GroupPage'));
 const PositionPage = lazy(() => import('./other/PositionPage'));
-<<<<<<< HEAD
 const PositionLivePage = lazy(() => import('./other/PositionLivePage'));
-=======
->>>>>>> upstream/master
 const NetworkPage = lazy(() => import('./other/NetworkPage'));
 const EventReportPage = lazy(() => import('./reports/EventReportPage'));
 const GeofenceReportPage = lazy(() => import('./reports/GeofenceReportPage'));
 const ReplayPage = lazy(() => import('./other/ReplayPage'));
-<<<<<<< HEAD
 const TimelinePage = lazy(() => import('./other/TimelinePage'));
-=======
->>>>>>> upstream/master
 const TripReportPage = lazy(() => import('./reports/TripReportPage'));
 const StopReportPage = lazy(() => import('./reports/StopReportPage'));
 const SummaryReportPage = lazy(() => import('./reports/SummaryReportPage'));
@@ -137,7 +131,6 @@ const Navigation = () => {
         <Route path="/change-server" element={<ChangeServerPage />} />
         <Route path="/" element={<App />}>
           <Route index element={<MainPage />} />
-<<<<<<< HEAD
           <Route path="dashboard" element={<MainPage />} />
 
           <Route path="position/:id" element={<PositionPage />} />
@@ -146,13 +139,6 @@ const Navigation = () => {
           <Route path="event/:id" element={<EventPage />} />
           <Route path="replay" element={<ReplayPage />} />
           <Route path="timeline/:id" element={<TimelinePage />} />
-=======
-
-          <Route path="position/:id" element={<PositionPage />} />
-          <Route path="network/:positionId" element={<NetworkPage />} />
-          <Route path="event/:id" element={<EventPage />} />
-          <Route path="replay" element={<ReplayPage />} />
->>>>>>> upstream/master
           <Route path="geofences" element={<GeofencesPage />} />
           <Route path="emulator" element={<EmulatorPage />} />
           <Route path="stream" element={<StreamPage />} />
@@ -173,10 +159,7 @@ const Navigation = () => {
             <Route path="devices" element={<DevicesPage />} />
             <Route path="device/:id/connections" element={<DeviceConnectionsPage />} />
             <Route path="device/:id/command" element={<CommandDevicePage />} />
-<<<<<<< HEAD
             <Route path="device/:id/blockdevice" element={<BlockDevicePage />} />
-=======
->>>>>>> upstream/master
             <Route path="device/:id" element={<DevicePage />} />
             <Route path="device" element={<DevicePage />} />
             <Route path="drivers" element={<DriversPage />} />

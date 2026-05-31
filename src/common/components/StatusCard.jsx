@@ -56,7 +56,6 @@ const useStyles = makeStyles()((theme, { desktopPadding }) => ({
     pointerEvents: 'auto',
     width: theme.dimensions.popupMaxWidth + 70,
   },
-<<<<<<< HEAD
   mediaButton: {
     color: theme.palette.text.secondary,
     display: 'flex',
@@ -73,29 +72,15 @@ const useStyles = makeStyles()((theme, { desktopPadding }) => ({
     zIndex: 2,
     pointerEvents: 'none',
   },
-=======
->>>>>>> upstream/master
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-<<<<<<< HEAD
     padding: theme.spacing(1.5, 2, 0, 2),
   },
   headerContent: {
     width: '100%',
     padding: theme.spacing(0.5),
-=======
-    padding: theme.spacing(1, 1, 0, 2),
-    color: theme.palette.text.secondary,
-  },
-  media: {
-    height: theme.dimensions.popupImageHeight,
-    '& > div': {
-      color: theme.palette.common.white,
-      mixBlendMode: 'difference',
-    },
->>>>>>> upstream/master
   },
   content: {
     paddingTop: theme.spacing(1),
@@ -254,15 +239,12 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
     });
     navigate(`/settings/geofence/${item.id}`);
   }, [navigate, position, t]);
-<<<<<<< HEAD
 
   const handleHoursClick = () => {
     if (!deviceReadonly && position?.deviceId) {
       navigate(`/settings/accumulators/${position.deviceId}`);
     }
   };
-=======
->>>>>>> upstream/master
 
   return (
     <>
@@ -274,7 +256,6 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
             dragHandleClassName="draggable-header"
             style={{ position: 'relative' }}
           >
-<<<<<<< HEAD
             <Card
               elevation={3}
               className={classes.card}
@@ -437,46 +418,6 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                           ))}
                       </TableBody>
                     )}
-=======
-            <Card elevation={3} className={classes.card}>
-              <CardMedia
-                className={`draggable-header ${deviceImage ? classes.media : ''}`}
-                image={deviceImage && `/api/media/${device.uniqueId}/${deviceImage}`}
-              >
-                <div className={classes.header}>
-                  <Typography variant="body2" color="inherit">
-                    {device.name}
-                  </Typography>
-                  <IconButton size="small" color="inherit" onClick={onClose} onTouchStart={onClose}>
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </div>
-              </CardMedia>
-              {position && (
-                <CardContent className={classes.content}>
-                  <Table size="small" className={classes.table}>
-                    <TableBody>
-                      {positionItems
-                        .split(',')
-                        .filter(
-                          (key) =>
-                            position.hasOwnProperty(key) || position.attributes.hasOwnProperty(key),
-                        )
-                        .map((key) => (
-                          <StatusRow
-                            key={key}
-                            name={positionAttributes[key]?.name || key}
-                            content={
-                              <PositionValue
-                                position={position}
-                                property={position.hasOwnProperty(key) ? key : null}
-                                attribute={position.hasOwnProperty(key) ? null : key}
-                              />
-                            }
-                          />
-                        ))}
-                    </TableBody>
->>>>>>> upstream/master
                     <TableFooter>
                       <TableRow>
                         <TableCell colSpan={2} className={classes.cell}>
