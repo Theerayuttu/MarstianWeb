@@ -154,6 +154,9 @@ const useStyles = makeStyles()((theme) => ({
   flag: {
     marginRight: theme.spacing(1),
   },
+  flag: {
+    marginRight: theme.spacing(1),
+  },
 }));
 
 const LoginPage = () => {
@@ -253,6 +256,7 @@ const LoginPage = () => {
   }, []);
 
   return (
+<<<<<<< HEAD
     <div className={classes.root}>
       <header className={classes.header}>
         <Typography className={classes.brand} component="h1">
@@ -265,6 +269,119 @@ const LoginPage = () => {
                 value={language}
                 onChange={(e) => setLocalLanguage(e.target.value)}
                 displayEmpty
+=======
+    <LoginLayout>
+      <div className={classes.options}>
+        {nativeEnvironment && changeEnabled && (
+          <IconButton color="primary" onClick={() => navigate('/change-server')}>
+            <Tooltip
+              title={`${t('settingsServer')}: ${window.location.hostname}`}
+              open={showServerTooltip}
+              arrow
+            >
+              <VpnLockIcon />
+            </Tooltip>
+          </IconButton>
+        )}
+        {!nativeEnvironment && (
+          <IconButton color="primary" onClick={() => setShowQr(true)}>
+            <QrCode2Icon />
+          </IconButton>
+        )}
+        {languageEnabled && (
+          <FormControl>
+            <Select value={language} onChange={(e) => setLocalLanguage(e.target.value)}>
+              {languageList.map((it) => (
+                <MenuItem key={it.code} value={it.code}>
+                  <span className={classes.flag}>
+                    <CountryFlag countryCode={it.country} svg />
+                  </span>
+                  {it.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      </div>
+      <div className={classes.container}>
+        {useMediaQuery(theme.breakpoints.down('lg')) && (
+          <LogoImage color={theme.palette.primary.main} />
+        )}
+        {!openIdForced && (
+          <>
+            <TextField
+              required
+              error={failed}
+              label={t('userEmail')}
+              name="email"
+              value={email}
+              autoComplete="email"
+              autoFocus={!email}
+              onChange={(e) => setEmail(e.target.value)}
+              helperText={failed && 'Invalid username or password'}
+            />
+            <TextField
+              required
+              error={failed}
+              label={t('userPassword')}
+              name="password"
+              value={password}
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              autoFocus={!!email}
+              onChange={(e) => setPassword(e.target.value)}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+            {codeEnabled && (
+              <TextField
+                required
+                error={failed}
+                label={t('loginTotpCode')}
+                name="code"
+                value={code}
+                type="number"
+                onChange={(e) => setCode(e.target.value)}
+              />
+            )}
+            <Button
+              onClick={handlePasswordLogin}
+              type="submit"
+              variant="contained"
+              color="secondary"
+              disabled={!email || !password || (codeEnabled && !code)}
+            >
+              {t('loginLogin')}
+            </Button>
+          </>
+        )}
+        {openIdEnabled && (
+          <Button onClick={() => handleOpenIdLogin()} variant="contained" color="secondary">
+            {t('loginOpenId')}
+          </Button>
+        )}
+        {!openIdForced && (
+          <div className={classes.extraContainer}>
+            {registrationEnabled && (
+              <Link
+                onClick={() => navigate('/register')}
+                className={classes.link}
+                underline="none"
+                variant="caption"
+>>>>>>> upstream/master
               >
                 {languageList.map((it) => (
                   <MenuItem key={it.code} value={it.code}>
