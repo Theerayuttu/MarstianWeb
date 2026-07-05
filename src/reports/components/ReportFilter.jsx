@@ -28,7 +28,7 @@ export const updateReportParams = (searchParams, setSearchParams, key, values) =
   setSearchParams(newParams, { replace: true });
 };
 
-const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, loading }) => {
+const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, loading, formats }) => {
   const { classes } = useReportStyles();
   const t = useTranslation();
 
@@ -40,15 +40,21 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
   const groups = useSelector((state) => state.groups.items);
   const deviceList = useMemo(
-    () => Object.values(devices).sort((a, b) => a.name.localeCompare(b.name)),
-    [devices],
+    () => [
+      { id: 'all', name: t('notificationAlways') },
+      ...Object.values(devices).sort((a, b) => a.name.localeCompare(b.name)),
+    ],
+    [devices, t],
   );
   const groupList = useMemo(
     () => Object.values(groups).sort((a, b) => a.name.localeCompare(b.name)),
     [groups],
   );
 
-  const deviceIds = useMemo(() => searchParams.getAll('deviceId').map(Number), [searchParams]);
+  const deviceIds = useMemo(
+    () => searchParams.getAll('deviceId').map((it) => (it === 'all' ? it : Number(it))),
+    [searchParams],
+  );
   const groupIds = useMemo(() => searchParams.getAll('groupId').map(Number), [searchParams]);
   const from = searchParams.get('from');
   const to = searchParams.get('to');
@@ -69,6 +75,9 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
     if (deviceType === 'single' && !deviceIds.length) {
       return true;
     }
+    if (deviceType === 'multiple' && !deviceIds.length && !groupIds.length) {
+      return true;
+    }
     if (selectedOption === 'schedule' && (!description || !calendarId)) {
       return true;
     }
@@ -82,7 +91,9 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
       json: t('reportShow'),
     };
     if (onExport && loaded) {
-      result.export = t('reportExport');
+      formats.forEach((format) => {
+        result[format] = `${t('reportExport')} (${format.toUpperCase()})`;
+      });
       result.print = t('reportPrint');
     }
     if (onSchedule && !readonly) {
@@ -94,9 +105,9 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
 
   useEffect(() => {
     if (from && to) {
-      onShow({ deviceIds, groupIds, from, to });
+      onShow({ deviceIds: deviceIds.filter((it) => it !== 'all'), groupIds, from, to });
     }
-  }, [deviceIds, groupIds, from, to]);
+  }, [deviceIds, groupIds, from, to, onShow]);
 
   useEffect(() => {
     if (deviceType === 'none' || deviceIds.length || groupIds.length || !selectedDeviceId) {
@@ -160,8 +171,18 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
 
   const onSelected = (type) => {
     switch (type) {
-      case 'export':
-        onExport({ deviceIds, groupIds, from, to });
+      case 'xlsx':
+      case 'csv':
+      case 'gpx':
+      case 'kml':
+      case 'kmz':
+        onExport({
+          deviceIds: deviceIds.filter((it) => it !== 'all'),
+          groupIds,
+          from,
+          to,
+          format: type,
+        });
         break;
       case 'print':
         window.print();
@@ -175,11 +196,15 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
   const onClick = (type) => {
     switch (type) {
       case 'schedule':
-        onSchedule(deviceIds, groupIds, {
-          description,
-          calendarId,
-          attributes: {},
-        });
+        onSchedule(
+          deviceIds.filter((it) => it !== 'all'),
+          groupIds,
+          {
+            description,
+            calendarId,
+            attributes: {},
+          },
+        );
         break;
       case 'json':
       default:
@@ -194,11 +219,11 @@ const ReportFilter = ({ children, onShow, onExport, onSchedule, deviceType, load
         <div className={classes.filterItem}>
           <SelectField
             label={t(deviceType === 'multiple' ? 'deviceTitle' : 'reportDevice')}
-            data={deviceList}
-            value={deviceType === 'multiple' ? deviceIds : deviceIds.find(() => true)}
-            placeholder={
-              deviceType === 'multiple' && !groupIds.length ? t('notificationAlways') : null
+            data={
+              deviceType === 'multiple' ? deviceList : deviceList.filter((it) => it.id !== 'all')
             }
+            value={deviceType === 'multiple' ? deviceIds : deviceIds.find(() => true)}
+            allValue="all"
             onChange={(e) => {
               const values =
                 deviceType === 'multiple' ? e.target.value : [e.target.value].filter((id) => id);

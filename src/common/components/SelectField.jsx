@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Autocomplete, TextField, Chip } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import { useEffectAsync } from '../../reactHelper';
+import { useAsyncTask } from '../../reactHelper';
 import fetchOrThrow from '../util/fetchOrThrow';
 
 const useStyles = makeStyles()(() => ({
@@ -36,6 +36,7 @@ const SelectField = ({
   helperText,
   placeholder,
   singleLine,
+  allValue,
 }) => {
   const { classes } = useStyles();
   const [items, setItems] = useState();
@@ -54,12 +55,15 @@ const SelectField = ({
 
   useEffect(() => setItems(data), [data]);
 
-  useEffectAsync(async () => {
-    if (endpoint) {
-      const response = await fetchOrThrow(endpoint);
-      setItems(await response.json());
-    }
-  }, []);
+  useAsyncTask(
+    async ({ signal }) => {
+      if (endpoint) {
+        const response = await fetchOrThrow(endpoint, { signal });
+        setItems(await response.json());
+      }
+    },
+    [endpoint],
+  );
 
   if (items) {
     const autocompleteValue = multiple
@@ -73,8 +77,8 @@ const SelectField = ({
         className={multiple && singleLine ? classes.autocompleteMultiple : undefined}
         options={items}
         getOptionLabel={getOptionLabel}
-        renderOption={(props, option) => (
-          <li {...props} key={keyGetter(option)}>
+        renderOption={({ key, ...props }, option) => (
+          <li key={keyGetter(option) || key} {...props}>
             {titleGetter(option)}
           </li>
         )}
@@ -84,7 +88,14 @@ const SelectField = ({
         value={autocompleteValue}
         onChange={(_, selectedValue) => {
           if (multiple) {
-            onChange({ target: { value: selectedValue.map((item) => keyGetter(item)) } });
+            let nextValue = selectedValue.map((item) => keyGetter(item));
+            if (allValue && nextValue.length > 1) {
+              const previousHadAll = (value || []).includes(allValue);
+              if (nextValue.includes(allValue)) {
+                nextValue = previousHadAll ? nextValue.filter((it) => it !== allValue) : [allValue];
+              }
+            }
+            onChange({ target: { value: nextValue } });
           } else {
             onChange({ target: { value: selectedValue ? keyGetter(selectedValue) : emptyValue } });
           }
@@ -120,11 +131,14 @@ const SelectField = ({
             label={label}
             helperText={helperText}
             placeholder={multiple && !autocompleteValue.length ? placeholder : undefined}
-            InputLabelProps={{
-              ...params.InputLabelProps,
-              shrink:
-                (multiple && !autocompleteValue.length && Boolean(placeholder)) ||
-                params.InputLabelProps?.shrink,
+            slotProps={{
+              ...params.slotProps,
+              inputLabel: {
+                ...params.slotProps?.inputLabel,
+                shrink:
+                  (multiple && !autocompleteValue.length && Boolean(placeholder)) ||
+                  params.slotProps?.inputLabel?.shrink,
+              },
             }}
           />
         )}

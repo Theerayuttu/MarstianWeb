@@ -36,6 +36,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import WorkHistoryOutlinedIcon from '@mui/icons-material/WorkHistoryOutlined';
 import MileageIcon from '../../resources/images/data/mileage.svg?react';
 import DevicetimeIcon from '../../resources/images/data/devicetime.svg?react';
+import VideocamIcon from '@mui/icons-material/Videocam';
 
 import { useTranslation } from './LocalizationProvider';
 import RemoveDialog from './RemoveDialog';
@@ -237,7 +238,7 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
       body: JSON.stringify({ deviceId: position.deviceId, geofenceId: item.id }),
     });
     navigate(`/settings/geofence/${item.id}`);
-  }, [navigate, position]);
+  }, [navigate, position, t]);
 
   const handleHoursClick = () => {
     if (!deviceReadonly && position?.deviceId) {
@@ -322,6 +323,14 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                       onClick={handleHoursClick}
                       sx={{ border: 'unset' }}
                     />
+                    {position.protocol === 'jt808' && (
+                    <Chip
+                      icon={<VideocamIcon />}
+                      label={t('linkLiveVideo')}
+                      variant="outlined"
+                      onClick={() => navigate(`/stream?deviceId=${deviceId}`)}
+                      sx={{ border: 'unset' }}
+                    />)}
                   </Stack>
                   <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                     <Chip
@@ -423,7 +432,7 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                   </Table>
                 </CardContent>
               )}
-              <CardActions classes={{ root: classes.actions }} disableSpacing>
+              <CardActions className={classes.actions} disableSpacing>
                 <Tooltip title={t('sharedExtra')}>
                   <IconButton
                     color="inherit"
@@ -500,6 +509,12 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
       </div>
       {position && (
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+          <MenuItem
+            onClick={() => navigate(`/stream?deviceId=${deviceId}`)}
+            disabled={position.protocol !== 'jt808'}
+          >
+            {t('linkLiveVideo')}
+          </MenuItem>
           {!readonly && <MenuItem onClick={handleGeofence}>{t('sharedCreateGeofence')}</MenuItem>}
           <MenuItem
             component="a"

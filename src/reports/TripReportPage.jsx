@@ -19,8 +19,9 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import ReportsMenu from './components/ReportsMenu';
 import ColumnSelect from './components/ColumnSelect';
+import ResizeHandle from './components/ResizeHandle';
 import usePersistedState from '../common/util/usePersistedState';
-import { useCatch, useEffectAsync } from '../reactHelper';
+import { useCatch, useCatchCallback, useAsyncTask } from '../reactHelper';
 import useReportStyles from './common/useReportStyles';
 import MapView from '../map/core/MapView';
 import MapRoutePath from '../map/MapRoutePath';
@@ -90,23 +91,27 @@ const TripReportPage = () => {
     },
   ];
 
-  useEffectAsync(async () => {
-    if (selectedItem) {
-      const query = new URLSearchParams({
-        deviceId: selectedItem.deviceId,
-        from: selectedItem.startTime,
-        to: selectedItem.endTime,
-      });
-      const response = await fetchOrThrow(`/api/reports/route?${query.toString()}`, {
-        headers: { Accept: 'application/json' },
-      });
-      setRoute(await response.json());
-    } else {
-      setRoute(null);
-    }
-  }, [selectedItem]);
+  useAsyncTask(
+    async ({ signal }) => {
+      if (selectedItem) {
+        const query = new URLSearchParams({
+          deviceId: selectedItem.deviceId,
+          from: selectedItem.startTime,
+          to: selectedItem.endTime,
+        });
+        const response = await fetchOrThrow(`/api/reports/route?${query.toString()}`, {
+          headers: { Accept: 'application/json' },
+          signal,
+        });
+        setRoute(await response.json());
+      } else {
+        setRoute(null);
+      }
+    },
+    [selectedItem],
+  );
 
-  const onShow = useCatch(async ({ deviceIds, groupIds, from, to }) => {
+  const onShow = useCatchCallback(async ({ deviceIds, groupIds, from, to }) => {
     const query = new URLSearchParams({ from, to });
     deviceIds.forEach((deviceId) => query.append('deviceId', deviceId));
     groupIds.forEach((groupId) => query.append('groupId', groupId));
@@ -119,7 +124,7 @@ const TripReportPage = () => {
     } finally {
       setLoading(false);
     }
-  });
+  }, []);
 
   const onExport = useCatch(async () => {
     const addressCache = new Map();
@@ -228,19 +233,22 @@ const TripReportPage = () => {
     <PageLayout menu={<ReportsMenu />} breadcrumbs={['reportTitle', 'reportTrips']}>
       <div className={classes.container}>
         {selectedItem && (
-          <div className={classes.containerMap}>
-            <MapView>
-              <MapGeofence />
-              {route && (
-                <>
-                  <MapRoutePath positions={route} />
-                  <MapMarkers markers={createMarkers()} />
-                  <MapCamera positions={route} />
-                </>
-              )}
-            </MapView>
-            <MapScale />
-          </div>
+          <>
+            <div className={classes.containerMap}>
+              <MapView>
+                <MapGeofence />
+                {route && (
+                  <>
+                    <MapRoutePath positions={route} />
+                    <MapMarkers markers={createMarkers()} />
+                    <MapCamera positions={route} />
+                  </>
+                )}
+              </MapView>
+              <MapScale />
+            </div>
+            <ResizeHandle />
+          </>
         )}
         <div className={classes.containerMain}>
           <div className={classes.header}>
@@ -250,6 +258,7 @@ const TripReportPage = () => {
               onSchedule={onSchedule}
               deviceType="multiple"
               loading={loading}
+              formats={['xlsx']}
             >
               <ColumnSelect columns={columns} setColumns={setColumns} columnsArray={columnsArray} />
             </ReportFilter>
