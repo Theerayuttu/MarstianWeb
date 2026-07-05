@@ -17,8 +17,9 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import PageLayout from '../common/components/PageLayout';
 import ReportsMenu from './components/ReportsMenu';
 import ColumnSelect from './components/ColumnSelect';
+import ResizeHandle from './components/ResizeHandle';
 import usePersistedState from '../common/util/usePersistedState';
-import { useCatch } from '../reactHelper';
+import { useCatch, useCatchCallback } from '../reactHelper';
 import useReportStyles from './common/useReportStyles';
 import MapPositions from '../map/MapPositions';
 import MapView from '../map/core/MapView';
@@ -67,7 +68,7 @@ const StopReportPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const onShow = useCatch(async ({ deviceIds, groupIds, from, to }) => {
+  const onShow = useCatchCallback(async ({ deviceIds, groupIds, from, to }) => {
     const query = new URLSearchParams({ from, to });
     deviceIds.forEach((deviceId) => query.append('deviceId', deviceId));
     groupIds.forEach((groupId) => query.append('groupId', groupId));
@@ -80,7 +81,7 @@ const StopReportPage = () => {
     } finally {
       setLoading(false);
     }
-  });
+  }, []);
 
   const onExport = useCatch(async () => {
     const addressCache = new Map();
@@ -154,24 +155,27 @@ const StopReportPage = () => {
     <PageLayout menu={<ReportsMenu />} breadcrumbs={['reportTitle', 'reportStops']}>
       <div className={classes.container}>
         {selectedItem && (
-          <div className={classes.containerMap}>
-            <MapView>
-              <MapGeofence />
-              <MapPositions
-                positions={[
-                  {
-                    deviceId: selectedItem.deviceId,
-                    fixTime: selectedItem.startTime,
-                    latitude: selectedItem.latitude,
-                    longitude: selectedItem.longitude,
-                  },
-                ]}
-                titleField="fixTime"
-              />
-            </MapView>
-            <MapScale />
-            <MapCamera latitude={selectedItem.latitude} longitude={selectedItem.longitude} />
-          </div>
+          <>
+            <div className={classes.containerMap}>
+              <MapView>
+                <MapGeofence />
+                <MapPositions
+                  positions={[
+                    {
+                      deviceId: selectedItem.deviceId,
+                      fixTime: selectedItem.startTime,
+                      latitude: selectedItem.latitude,
+                      longitude: selectedItem.longitude,
+                    },
+                  ]}
+                  titleField="fixTime"
+                />
+              </MapView>
+              <MapScale />
+              <MapCamera latitude={selectedItem.latitude} longitude={selectedItem.longitude} />
+            </div>
+            <ResizeHandle />
+          </>
         )}
         <div className={classes.containerMain}>
           <div className={classes.header}>
@@ -181,6 +185,7 @@ const StopReportPage = () => {
               onSchedule={onSchedule}
               deviceType="multiple"
               loading={loading}
+              formats={['xlsx']}
             >
               <ColumnSelect columns={columns} setColumns={setColumns} columnsArray={columnsArray} />
             </ReportFilter>

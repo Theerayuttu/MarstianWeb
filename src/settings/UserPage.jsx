@@ -128,7 +128,7 @@ const UserPage = () => {
     item &&
     item.name &&
     item.email &&
-    (item.id || item.password) &&
+    (item.id || item.password || openIdForced) &&
     (admin || !totpForce || item.totpKey);
 
   return (
