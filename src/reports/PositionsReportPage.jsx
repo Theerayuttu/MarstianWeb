@@ -11,8 +11,9 @@ import PageLayout from '../common/components/PageLayout';
 import ReportsMenu from './components/ReportsMenu';
 import PositionValue from '../common/components/PositionValue';
 import ColumnSelect from './components/ColumnSelect';
+import ResizeHandle from './components/ResizeHandle';
 import usePositionAttributes from '../common/attributes/usePositionAttributes';
-import { useCatch } from '../reactHelper';
+import { useCatch, useCatchCallback } from '../reactHelper';
 import MapView from '../map/core/MapView';
 import MapRoutePath from '../map/MapRoutePath';
 import MapRoutePoints from '../map/MapRoutePoints';
@@ -67,39 +68,44 @@ const PositionsReportPage = () => {
     [items, setSelectedItem],
   );
 
-  const onShow = useCatch(async ({ deviceIds, from, to }) => {
-    const query = new URLSearchParams({ from, to });
-    if (geofenceId) {
-      query.append('geofenceId', geofenceId);
-    }
-    deviceIds.forEach((deviceId) => query.append('deviceId', deviceId));
-    setLoading(true);
-    try {
-      const response = await fetchOrThrow(`/api/positions?${query.toString()}`, {
-        headers: { Accept: 'application/json' },
-      });
-      const data = await response.json();
-      const keySet = new Set();
-      const keyList = [];
-      data.forEach((position) => {
-        Object.keys(position).forEach((it) => keySet.add(it));
-        Object.keys(position.attributes).forEach((it) => keySet.add(it));
-      });
-      ['id', 'deviceId', 'outdated', 'network', 'attributes'].forEach((key) => keySet.delete(key));
-      Object.keys(positionAttributes).forEach((key) => {
-        if (keySet.has(key)) {
-          keyList.push(key);
-          keySet.delete(key);
-        }
-      });
-      setAvailable(
-        [...keyList, ...keySet].map((key) => [key, positionAttributes[key]?.name || key]),
-      );
-      setItems(data);
-    } finally {
-      setLoading(false);
-    }
-  });
+  const onShow = useCatchCallback(
+    async ({ deviceIds, from, to }) => {
+      const query = new URLSearchParams({ from, to });
+      if (geofenceId) {
+        query.append('geofenceId', geofenceId);
+      }
+      deviceIds.forEach((deviceId) => query.append('deviceId', deviceId));
+      setLoading(true);
+      try {
+        const response = await fetchOrThrow(`/api/positions?${query.toString()}`, {
+          headers: { Accept: 'application/json' },
+        });
+        const data = await response.json();
+        const keySet = new Set();
+        const keyList = [];
+        data.forEach((position) => {
+          Object.keys(position).forEach((it) => keySet.add(it));
+          Object.keys(position.attributes).forEach((it) => keySet.add(it));
+        });
+        ['id', 'deviceId', 'outdated', 'network', 'attributes'].forEach((key) =>
+          keySet.delete(key),
+        );
+        Object.keys(positionAttributes).forEach((key) => {
+          if (keySet.has(key)) {
+            keyList.push(key);
+            keySet.delete(key);
+          }
+        });
+        setAvailable(
+          [...keyList, ...keySet].map((key) => [key, positionAttributes[key]?.name || key]),
+        );
+        setItems(data);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [geofenceId, positionAttributes],
+  );
 
   const onExport = useCatch(async () => {
     const rows = items.map((item) => {
@@ -133,23 +139,26 @@ const PositionsReportPage = () => {
     <PageLayout menu={<ReportsMenu />} breadcrumbs={['reportTitle', 'reportPositions']}>
       <div className={classes.container}>
         {selectedItem && (
-          <div className={classes.containerMap}>
-            <MapView>
-              <MapGeofence />
-              {[...new Set(items.map((it) => it.deviceId))].map((deviceId) => {
-                const positions = items.filter((position) => position.deviceId === deviceId);
-                return (
-                  <Fragment key={deviceId}>
-                    <MapRoutePath positions={positions} />
-                    <MapRoutePoints positions={positions} onClick={onMapPointClick} />
-                  </Fragment>
-                );
-              })}
-              <MapPositions positions={[selectedItem]} titleField="fixTime" />
-            </MapView>
-            <MapScale />
-            <MapCamera positions={items} />
-          </div>
+          <>
+            <div className={classes.containerMap}>
+              <MapView>
+                <MapGeofence />
+                {[...new Set(items.map((it) => it.deviceId))].map((deviceId) => {
+                  const positions = items.filter((position) => position.deviceId === deviceId);
+                  return (
+                    <Fragment key={deviceId}>
+                      <MapRoutePath positions={positions} />
+                      <MapRoutePoints positions={positions} onClick={onMapPointClick} />
+                    </Fragment>
+                  );
+                })}
+                <MapPositions positions={[selectedItem]} titleField="fixTime" />
+              </MapView>
+              <MapScale />
+              <MapCamera positions={items} />
+            </div>
+            <ResizeHandle />
+          </>
         )}
         <div className={classes.containerMain}>
           <div className={classes.header}>
@@ -159,6 +168,7 @@ const PositionsReportPage = () => {
               onSchedule={onSchedule}
               deviceType="single"
               loading={loading}
+              formats={['csv', 'gpx', 'kml', 'kmz']}
             >
               <div className={classes.filterItem}>
                 <SelectField
@@ -224,7 +234,7 @@ const PositionsReportPage = () => {
                         itemId={item.id}
                         endpoint="positions"
                         readonly={readonly}
-                        setTimestamp={() => {
+                        onReload={() => {
                           setItems(items.filter((position) => position.id !== item.id));
                         }}
                       />

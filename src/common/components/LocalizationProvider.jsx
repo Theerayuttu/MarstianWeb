@@ -1,22 +1,46 @@
-import { createContext, use, useEffect, useMemo } from 'react';
+import { createContext, use, useEffect, useMemo, Suspense } from 'react';
 import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
 import usePersistedState from '../util/usePersistedState';
+import Loader from './Loader';
 
 import en from '../../resources/l10n/en.json';
 import 'dayjs/locale/en';
-import hi from '../../resources/l10n/hi.json';
-import 'dayjs/locale/hi';
-import th from '../../resources/l10n/th.json';
-import 'dayjs/locale/th';
-import zh from '../../resources/l10n/zh.json';
-import 'dayjs/locale/zh';
+
+const localeLoaders = import.meta.glob([
+  '../../resources/l10n/*.json',
+  '!../../resources/l10n/en.json',
+]);
+
+const dayjsLoaders = {
+  en: () => Promise.resolve({ default: { name: 'en' } }),
+  hi: () => import('dayjs/locale/hi.js'),
+  th: () => import('dayjs/locale/th.js'),
+  zh: () => import('dayjs/locale/zh.js'),
+};
 
 const languages = {
-  en: { data: en, country: 'US', name: 'English' },
-  th: { data: th, country: 'TH', name: 'ไทย' },
-  zh: { data: zh, country: 'CN', name: '中文' },
-  hi: { data: hi, country: 'IN', name: 'हिन्दी' },
+  en: { country: 'US', name: 'English' },
+  th: { country: 'TH', name: 'ไทย' },
+  zh: { country: 'CN', name: '中文' },
+  hi: { country: 'IN', name: 'हिन्दी' },
+};
+
+const cache = new Map([['en', Promise.resolve({ data: en, dayjsName: 'en' })]]);
+
+const loadLocale = (language) => {
+  if (!cache.has(language)) {
+    const dataLoader = localeLoaders[`../../resources/l10n/${language}.json`];
+    const dayjsLoader = dayjsLoaders[language];
+    cache.set(
+      language,
+      Promise.all([dataLoader(), dayjsLoader()]).then(([dataMod, dayjsMod]) => ({
+        data: dataMod.default,
+        dayjsName: dayjsMod.default.name,
+      })),
+    );
+  }
+  return cache.get(language);
 };
 
 const getDefaultLanguage = () => {
@@ -44,7 +68,31 @@ const LocalizationContext = createContext({
   languages,
   language: 'en',
   setLocalLanguage: () => {},
+  direction: 'ltr',
 });
+
+const ResolvedLocalizationProvider = ({ language, setLocalLanguage, children }) => {
+  const { data, dayjsName } = use(loadLocale(language));
+
+  const direction = /^(ar|he|fa)$/.test(language) ? 'rtl' : 'ltr';
+
+  const value = useMemo(
+    () => ({
+      languages: { ...languages, [language]: { ...languages[language], data } },
+      language,
+      setLocalLanguage,
+      direction,
+    }),
+    [language, data, setLocalLanguage, direction],
+  );
+
+  useEffect(() => {
+    dayjs.locale(dayjsName);
+    document.dir = direction;
+  }, [dayjsName, direction]);
+
+  return <LocalizationContext value={value}>{children}</LocalizationContext>;
+};
 
 export const LocalizationProvider = ({ children }) => {
   const remoteLanguage = useSelector((state) => {
@@ -58,25 +106,13 @@ export const LocalizationProvider = ({ children }) => {
 
   const language = remoteLanguage || localLanguage;
 
-  const direction = /^(ar|he|fa)$/.test(language) ? 'rtl' : 'ltr';
-
-  const value = useMemo(
-    () => ({ languages, language, setLocalLanguage, direction }),
-    [language, setLocalLanguage, direction],
+  return (
+    <Suspense fallback={<Loader />}>
+      <ResolvedLocalizationProvider language={language} setLocalLanguage={setLocalLanguage}>
+        {children}
+      </ResolvedLocalizationProvider>
+    </Suspense>
   );
-
-  useEffect(() => {
-    let selected;
-    if (language.length > 2) {
-      selected = `${language.slice(0, 2)}-${language.slice(-2).toLowerCase()}`;
-    } else {
-      selected = language;
-    }
-    dayjs.locale(selected);
-    document.dir = direction;
-  }, [language, direction]);
-
-  return <LocalizationContext value={value}>{children}</LocalizationContext>;
 };
 
 export const useLocalization = () => use(LocalizationContext);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -151,6 +151,9 @@ const useStyles = makeStyles()((theme) => ({
   secondaryLink: {
     fontWeight: 600,
   },
+  flag: {
+    marginRight: theme.spacing(1),
+  },
 }));
 
 const LoginPage = () => {
@@ -227,6 +230,9 @@ const LoginPage = () => {
     navigate('/');
   });
 
+  const handleTokenLoginRef = useRef(handleTokenLogin);
+  handleTokenLoginRef.current = handleTokenLogin;
+
   const handleOpenIdLogin = () => {
     document.location = '/api/session/openid/auth';
   };
@@ -234,7 +240,7 @@ const LoginPage = () => {
   useEffect(() => nativePostMessage('authentication'), []);
 
   useEffect(() => {
-    const listener = (token) => handleTokenLogin(token);
+    const listener = (token) => handleTokenLoginRef.current(token);
     handleLoginTokenListeners.add(listener);
     return () => handleLoginTokenListeners.delete(listener);
   }, []);
