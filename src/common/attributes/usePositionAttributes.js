@@ -396,6 +396,33 @@ export default (t) =>
         type: 'number',
         subtype: 'speed',
       },
+      soc: {
+        name: 'SoC',
+        type: 'number',
+        dataType: 'percentage',
+      },
+      charge: {
+        name: 'Charging',
+        type: 'string',
+      },
+      poweron: {
+        name: t('alarmPowerOn'),
+        type: 'boolean',
+      },
+      poweroff: {
+        name: t('alarmPowerOff'),
+        type: 'boolean',
+      },
+      LV: {
+        name: 'Aux Batt',
+        type: 'number',
+        dataType: 'voltage',
+      },
+      HV: {
+        name: 'HV Batt',
+        type: 'number',
+        dataType: 'voltage',
+      },
     }),
     [t],
   );

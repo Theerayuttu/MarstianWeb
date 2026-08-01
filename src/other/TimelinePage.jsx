@@ -88,11 +88,17 @@ const TimelinePage = () => {
 
   const [engineHours, setEngineHours] = useState(0);
   const [spentFuel, setSpentFuel] = useState(0);
+  const [spentSoc, setSpentSoc] = useState(0);
   const [maxSpeed, setMaxSpeed] = useState(0);
 
   const deviceName = useSelector((state) => {
     const device = state.devices.items[id];
     return device?.name || null;
+  });
+
+  const deviceCate = useSelector((state) => {
+    const device = state.devices.items[id];
+    return device?.category.substring(0, 2) || null;
   });
 
   useEffectAsync(async () => {
@@ -122,6 +128,7 @@ const TimelinePage = () => {
     const summary = summaryRows.find(() => true) || {};
     setEngineHours(summary.engineHours || 0);
     setSpentFuel(summary.spentFuel || 0);
+    setSpentSoc(summary.spentSoc || 0);
     setMaxSpeed(summary.maxSpeed || 0);
   }, [id, from, to]);
 
@@ -194,11 +201,11 @@ const TimelinePage = () => {
 
           <Paper className={classes.card} sx={{ gridColumn: chartColumn }}>
             <Typography variant="h6" className={classes.title}>
-              {`${t('reportSpentFuel')} [${formatPercentage(spentFuel)}]`}
+              {`${deviceCate !== 'ev' ? t('reportSpentFuel') : t('reportSpentSoc')} [${formatPercentage(deviceCate !== 'ev' ? spentFuel : spentSoc)}]`}
             </Typography>
             <Box className={classes.chartCard}>
               {routes.length ? (
-                <LineChartAttributes routesdata={routes} attr="fuel" min={0} max={100} />
+                <LineChartAttributes routesdata={routes} attr={deviceCate !== 'ev' ? "fuel" : "soc"} min={0} max={100} />
               ) : (
                 <Box className={classes.emptyState}>{t('sharedNoData')}</Box>
               )}
@@ -220,11 +227,11 @@ const TimelinePage = () => {
 
           <Paper className={classes.card} sx={{ gridColumn: chartColumn }}>
             <Typography variant="h6" className={classes.title}>
-              {`${t('positionPower')} (${t('sharedVoltAbbreviation')})`}
+              {`${t('positionPower')} (${ deviceCate === 'ev' ? "kW" : t('sharedVoltAbbreviation') })`}
             </Typography>
             <Box className={classes.chartCard}>
               {routes.length ? (
-                <LineChartAttributes routesdata={routes} attr="power" min={0} max={36} />
+                <LineChartAttributes routesdata={routes} attr={deviceCate === 'ev' ? "remainingPower" : "power"} min={0} max={36} />
               ) : (
                 <Box className={classes.emptyState}>{t('sharedNoData')}</Box>
               )}

@@ -9,6 +9,11 @@ import distanceIcon from '../../resources/images/data/distance.svg';
 import fuelConsumptionIcon from '../../resources/images/data/fuelConsumption.svg';
 import coolantTempIcon from '../../resources/images/data/coolantTemp.svg';
 import driverIdIcon from '../../resources/images/data/driverUniqueId.svg';
+import evbatteryIcon from '../../resources/images/data/evbattery.svg';
+import chargingIcon from '../../resources/images/data/evcharging.svg';
+import poweronIcon from '../../resources/images/data/poweron.svg';
+import poweroffIcon from '../../resources/images/data/poweroff.svg';
+import hvIcon from '../../resources/images/data/hv.svg';
 
 export const mapIconAttributes = {
   fuel: fuelIcon,
@@ -21,6 +26,12 @@ export const mapIconAttributes = {
   fuelConsumption: fuelConsumptionIcon,
   coolantTemp: coolantTempIcon,
   driverUniqueId: driverIdIcon,
+  soc:evbatteryIcon,
+  charge:chargingIcon,
+  poweron:poweronIcon,
+  poweroff:poweroffIcon,
+  LV:PowerIcon,
+  HV:hvIcon,
   default: defaultIcon,
 };
 

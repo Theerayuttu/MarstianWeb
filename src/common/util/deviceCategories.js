@@ -41,4 +41,11 @@ export default [
   'forklift3',
   'telescoplifter',
   'backfillcompactor',
+  'garbagetruck',
+  'evcar',
+  'evpickup',
+  'evsuv',
+  'evtruck',
+  'evbus',
+  'evgarbage',
 ];

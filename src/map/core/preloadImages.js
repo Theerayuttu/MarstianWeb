@@ -49,6 +49,10 @@ import loaderSvg from '../../resources/images/icon/loader.svg';
 import forklift3Svg from '../../resources/images/icon/forklift3.svg';
 import telescoplifterSvg from '../../resources/images/icon/telescoplifter.svg';
 import backfillcompactorSvg from '../../resources/images/icon/backfillcompactor.svg';
+import evtruckSvg from '../../resources/images/icon/evtruck.svg';
+import garbagetruckSvg from '../../resources/images/icon/garbagetruck.svg';
+import evcarSvg from '../../resources/images/icon/evcar.svg';
+import evbusSvg from '../../resources/images/icon/evbus.svg';
 
 export const mapIcons = {
   animal: animalSvg,
@@ -95,6 +99,10 @@ export const mapIcons = {
   forklift3: forklift3Svg,
   telescoplifter: telescoplifterSvg,
   backfillcompactor: backfillcompactorSvg,
+  evtruck: evtruckSvg,
+  garbagetruck: garbagetruckSvg,
+  evbus: evbusSvg,
+  evcar: evcarSvg,
 };
 
 export const mapIconKey = (category) => {
@@ -103,6 +111,11 @@ export const mapIconKey = (category) => {
       return 'car';
     case 'trolleybus':
       return 'bus';
+    case 'evpickup':
+    case 'evsuv':
+      return 'evcar';
+    case 'evgarbage':
+      return 'garbagetruck';
     default:
       return mapIcons.hasOwnProperty(category) ? category : 'default';
   }

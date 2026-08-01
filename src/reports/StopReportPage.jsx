@@ -42,6 +42,7 @@ const columnsArray = [
   ['duration', 'reportDuration'],
   ['engineHours', 'reportEngineHours'],
   ['spentFuel', 'reportSpentFuel'],
+  ['spentSoc','reportSpentSoc'],
 ];
 const columnsMap = new Map(columnsArray);
 

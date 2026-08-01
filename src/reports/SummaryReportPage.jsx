@@ -48,6 +48,7 @@ const columnsArray = [
   ['startHours', 'reportStartEngineHours'],
   ['endHours', 'reportEndEngineHours'],
   ['spentFuel', 'reportSpentFuel'],
+  ['spentSoc','reportSpentSoc'],
   ['startAddress', 'reportStartAddress'],
   ['endAddress', 'reportEndAddress'],
 ];
@@ -165,7 +166,8 @@ const SummaryReportPage = () => {
       case 'endHours':
         return value > 0 ? formatNumericHours(value, t, 'h:m') : 0;
       case 'spentFuel':
-        return value > 0 ? formatPercentage(value) : 0;
+      case 'spentSoc':
+        return formatPercentage(value);
       case 'startAddress':
         return (
           <AddressValue
