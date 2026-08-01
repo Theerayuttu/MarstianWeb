@@ -422,7 +422,7 @@ const MainPage = () => {
 
   const [filteredDevices, setFilteredDevices] = useState([]);
 
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = usePersistedState('keyword', '');
   const [filter, setFilter] = usePersistedState('filter', {
     statuses: [],
     groups: [],
@@ -430,7 +430,8 @@ const MainPage = () => {
   const [filterSort, setFilterSort] = usePersistedState('filterSort', '');
   const [filterMap, setFilterMap] = usePersistedState('filterMap', false);
 
-  const [devicesOpen, setDevicesOpen] = useState(desktop);
+  const [persistedDevicesOpen, setPersistedDevicesOpen] = usePersistedState('devicesOpen', true);
+  const [devicesOpen, setDevicesOpen] = useState(desktop ? persistedDevicesOpen : false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [summaryItems, setSummaryItems] = useState([]);
@@ -450,12 +451,18 @@ const MainPage = () => {
   }, [desktop, mapOnSelect, selectedDeviceId]);
 
   useEffect(() => {
-    //if (desktop) {
-    //  setDevicesOpen(true);
-    //} else {
-    setDevicesOpen(false);
-    //}
+    // On breakpoint change: desktop restores the remembered state, mobile shows the map.
+    setDevicesOpen(desktop ? persistedDevicesOpen : false);
+    // eslint-disable-next-line @eslint-react/exhaustive-deps
   }, [desktop]);
+
+  // Remember the desktop open/closed state across navigation; mobile is never
+  // persisted so it can't overwrite what desktop remembered.
+  useEffect(() => {
+    if (desktop) {
+      setPersistedDevicesOpen(devicesOpen);
+    }
+  }, [desktop, devicesOpen, setPersistedDevicesOpen]);
 
   useEffect(() => {
     if (!isDashboardPage) {
