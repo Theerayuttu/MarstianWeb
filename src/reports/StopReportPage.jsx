@@ -136,6 +136,7 @@ const StopReportPage = () => {
       case 'engineHours':
         return value > 0 ? formatNumericHours(value, t, 'h:m') : 0;
       case 'spentFuel':
+      case 'spentSoc':
         return value > 0 ? formatPercentage(value) : 0;
       case 'address':
         return (

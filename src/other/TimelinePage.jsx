@@ -181,7 +181,7 @@ const TimelinePage = () => {
 
           <Paper className={classes.card} sx={{ gridColumn: chartColumn }}>
             <Typography variant="h6" className={classes.title}>
-              {`${t('reportEngineHours')} [${formatNumericHours(engineHours, t)}]`}
+              {`${deviceCate !== 'ev' ? t('reportEngineHours') : t('alarmPowerOn') } [${formatNumericHours(engineHours, t)}]`}
             </Typography>
             <Box className={classes.chartCard}>
               {routes.length ? (
