@@ -17,6 +17,8 @@ import {
   formatVoltage,
   formatVolume,
   formatConsumption,
+  formatPower,
+  formatPowerConsumption,
 } from '../util/formatter';
 import { speedToKnots } from '../util/converter';
 import { useAttributePreference, usePreference } from '../util/preferences';
@@ -63,12 +65,20 @@ const PositionValue = ({ position, property, attribute }) => {
       case 'fuelConsumption':
         return formatConsumption(value, t);
       case 'coolantTemp':
-        return formatTemperature(value);
+      case 'batteryTemp':
+        return formatTemperature(value, 0);
       case 'alarm':
         return formatAlarm(value, t);
       case 'adc2':
       case 'adc3':
         return formatNumber(value, 2);
+      case 'powerConsumption':
+        return formatPowerConsumption(value,0);
+      case 'remainingPower':
+        return formatPower(value,0);
+      case 'motorPower':
+      case 'batteryPower':
+        return formatPower(value);
       default:
         switch (positionAttributes[key]?.dataType) {
           case 'speed':

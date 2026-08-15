@@ -178,7 +178,7 @@ const StatusCell = ({ name, content, iconKey }) => {
         {name}
       </Typography>
       <Typography variant="body2" color="textSecondary" className={classes.statusText}>
-        {content}
+        { ['poweron', 'poweroff'].includes(attributeKey) ? '' : content}
       </Typography>
     </Box>
   );
@@ -372,8 +372,9 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                                 .split(',')
                                 .filter(
                                   (key) =>
-                                    position.hasOwnProperty(key) ||
-                                    position.attributes.hasOwnProperty(key),
+                                    ( position.hasOwnProperty(key) ||
+                                      position.attributes.hasOwnProperty(key) ) &&
+                                    !(device.category.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
                                 )
                                 .slice(0, 5)
                                 .map((key) => (
@@ -400,8 +401,9 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                           .split(',')
                           .filter(
                             (key) =>
-                              position.hasOwnProperty(key) ||
-                              position.attributes.hasOwnProperty(key),
+                              ( position.hasOwnProperty(key) ||
+                                position.attributes.hasOwnProperty(key) ) &&
+                              !(device.category.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
                           )
                           .map((key) => (
                             <StatusRow

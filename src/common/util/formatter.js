@@ -25,9 +25,13 @@ export const formatNumber = (value, precision = 1) => Number(value.toFixed(preci
 
 export const formatPercentage = (value) => `${value.toFixed(0)}%`;
 
-export const formatTemperature = (value) => `${value.toFixed(1)}°C`;
+export const formatTemperature = (value, precision = 1) => `${value.toFixed(precision)}°C`;
 
-export const formatVoltage = (value, t) => `${value.toFixed(1)} ${t('sharedVoltAbbreviation')}`;
+export const formatVoltage = (value, t, precision = 1) => `${value.toFixed(precision)} ${t('sharedVoltAbbreviation')}`;
+
+export const formatPowerConsumption = (value, precision = 1) => `${value.toFixed(precision)} kWh`;
+
+export const formatPower = (value, precision = 1) => `${value.toFixed(precision)} kW`;
 
 export const formatConsumption = (value, t) =>
   `${value.toFixed(1)} ${t('sharedLiterPerHourAbbreviation')}`;

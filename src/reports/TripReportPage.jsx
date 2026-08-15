@@ -49,6 +49,7 @@ const columnsArray = [
   ['maxSpeed', 'reportMaximumSpeed'],
   ['duration', 'reportDuration'],
   ['spentFuel', 'reportSpentFuel'],
+  ['spentSoc','reportSpentSoc'],
   ['driverName', 'sharedDriver'],
 ];
 const columnsMap = new Map(columnsArray);
@@ -203,6 +204,7 @@ const TripReportPage = () => {
       case 'duration':
         return formatNumericHours(value, t, 'h:m');
       case 'spentFuel':
+      case 'spentSoc':
         return value > 0 ? formatPercentage(value) : 0;
       case 'startAddress':
         return (
