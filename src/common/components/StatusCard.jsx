@@ -374,7 +374,7 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                                   (key) =>
                                     ( position.hasOwnProperty(key) ||
                                       position.attributes.hasOwnProperty(key) ) &&
-                                    !(device.category.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
+                                    !(device.category?.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
                                 )
                                 .slice(0, 5)
                                 .map((key) => (
@@ -403,7 +403,7 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                             (key) =>
                               ( position.hasOwnProperty(key) ||
                                 position.attributes.hasOwnProperty(key) ) &&
-                              !(device.category.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
+                              !(device.category?.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
                           )
                           .map((key) => (
                             <StatusRow
