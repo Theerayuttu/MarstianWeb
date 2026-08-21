@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import { useAttributePreference } from '../util/preferences';
@@ -17,6 +17,8 @@ const LineChartAttributes = ({
   const theme = useTheme();
   const speedUnit = useAttributePreference('speedUnit');
   const [items, setItems] = useState([]);
+
+  const timeType = 'fixTime';
 
   useEffect(() => {
     const formatted = (routesdata || []).map((position) => {
@@ -71,12 +73,12 @@ const LineChartAttributes = ({
       >
         <defs>
           <linearGradient id={`timeline-gradient-${attr}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={primaryFillColor} stopOpacity={0.7} />
+            <stop offset="5%" stopColor={primaryFillColor} stopOpacity={0.4} />
             <stop offset="95%" stopColor={primaryFillColor} stopOpacity={0} />
           </linearGradient>
         </defs>
         <XAxis
-          dataKey="fixTime"
+          dataKey={timeType}
           tickFormatter={(value) => formatTime(value, 'time')}
           domain={['dataMin', 'dataMax']}
           type="number"

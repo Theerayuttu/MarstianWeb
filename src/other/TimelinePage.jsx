@@ -13,14 +13,27 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import ArrowBackIosNew from '@mui/icons-material/ArrowBackIosNew';
+import RouteIcon from '@mui/icons-material/Route';
+import BoltIcon from '@mui/icons-material/Bolt';
+import SpeedIcon from '@mui/icons-material/Speed';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
+import EvStationIcon from '@mui/icons-material/EvStation';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useEffectAsync, useCatch } from '../reactHelper';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import CalendarLine from '../common/components/CalendarLine';
 import TimelineMap from './TimelineMap';
+import TripLog from './TripLog';
+import SummaryStat from './SummaryStat';
 import LineChartAttributes from '../common/components/LineChartAttributes';
 import { formatNumericHours, formatPercentage, formatSpeed } from '../common/util/formatter';
+import {
+  distanceFromMeters,
+  distanceUnitString,
+  speedFromKnots,
+  speedUnitString,
+} from '../common/util/converter';
 import { useAttributePreference } from '../common/util/preferences';
 import TimelineIcon from '../resources/images/data/timeline.svg?react';
 import fetchOrThrow from '../common/util/fetchOrThrow';
@@ -34,30 +47,59 @@ const useStyles = makeStyles()((theme) => ({
   },
   content: {
     overflow: 'auto',
-    padding: theme.spacing(1.5),
+    padding: theme.spacing(2),
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(12, minmax(0, 1fr))',
-    gap: theme.spacing(1.5),
+    gap: theme.spacing(2),
     [theme.breakpoints.down('md')]: {
-      gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+      gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+    },
+  },
+  statRow: {
+    gridColumn: '1 / -1',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: theme.spacing(2),
+    [theme.breakpoints.down('md')]: {
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    },
+  },
+  chartRow: {
+    gridColumn: '1 / -1',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gap: theme.spacing(2),
+    [theme.breakpoints.down('lg')]: {
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    },
+    [theme.breakpoints.down('sm')]: {
+      gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
     },
   },
   card: {
-    borderRadius: theme.spacing(1.5),
+    borderRadius: theme.spacing(2),
     border: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(1.25),
+    padding: theme.spacing(2),
     background: theme.palette.background.paper,
+    transition: 'box-shadow 0.2s ease',
+    '&:hover': {
+      boxShadow: theme.shadows[3],
+    },
   },
   title: {
-    fontWeight: 600,
-    marginBottom: theme.spacing(0.75),
+    fontWeight: 800,
+    fontSize: '0.7rem',
+    letterSpacing: '0em',
+    textTransform: 'uppercase',
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(1.5),
   },
   mapCard: {
-    height: 360,
+    height: 500,
     [theme.breakpoints.down('md')]: {
-      height: 300,
+      height: 360,
     },
   },
   chartCard: {
@@ -80,31 +122,46 @@ const TimelinePage = () => {
   const theme = useTheme();
   const desktop = useMediaQuery(theme.breakpoints.up('md'));
   const speedUnit = useAttributePreference('speedUnit');
+  const distanceUnit = useAttributePreference('distanceUnit');
 
   const [from, setFrom] = useState(() => dayjs().startOf('day').toISOString());
   const [to, setTo] = useState(() => dayjs().endOf('day').toISOString());
-  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [routes, setRoutes] = useState([]);
+  const [trips, setTrips] = useState([]);
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
+  const [distance, setDistance] = useState(0);
   const [engineHours, setEngineHours] = useState(0);
   const [spentFuel, setSpentFuel] = useState(0);
   const [spentSoc, setSpentSoc] = useState(0);
   const [maxSpeed, setMaxSpeed] = useState(0);
+  const [avgSpeed, setAvgSpeed] = useState(0);
 
   const deviceName = useSelector((state) => {
     const device = state.devices.items[id];
     return device?.name || null;
   });
 
+  const deviceModel = useSelector((state) => {
+    const device = state.devices.items[id];
+    return device?.model || device?.category || null;
+  });
+
   const deviceCate = useSelector((state) => {
     const device = state.devices.items[id];
-    return device?.category.substring(0, 2) || null;
+    return device?.category?.substring(0, 2) || null;
   });
+
+  const isEv = deviceCate === 'ev';
 
   useEffectAsync(async () => {
     if (!id) {
       return;
     }
+
+    setSelectedTrip(null);
+    setLoading(true);
 
     const query = new URLSearchParams({
       deviceId: id,
@@ -112,24 +169,31 @@ const TimelinePage = () => {
       to,
     });
 
-    const positionsResponse = await fetchOrThrow(`/api/positions?${query.toString()}`);
-    const nextPositions = await positionsResponse.json();
-    setPositions(nextPositions);
+    try {
+      const routeResponse = await fetchOrThrow(`/api/reports/route?${query.toString()}`, {
+        headers: { Accept: 'application/json' },
+      });
+      setRoutes(await routeResponse.json());
 
-    const routeResponse = await fetchOrThrow(`/api/reports/route?${query.toString()}`, {
-      headers: { Accept: 'application/json' },
-    });
-    setRoutes(await routeResponse.json());
+      const tripsResponse = await fetchOrThrow(`/api/reports/trips?${query.toString()}`, {
+        headers: { Accept: 'application/json' },
+      });
+      setTrips(await tripsResponse.json());
 
-    const summaryResponse = await fetchOrThrow(`/api/reports/summary?${query.toString()}`, {
-      headers: { Accept: 'application/json' },
-    });
-    const summaryRows = await summaryResponse.json();
-    const summary = summaryRows.find(() => true) || {};
-    setEngineHours(summary.engineHours || 0);
-    setSpentFuel(summary.spentFuel || 0);
-    setSpentSoc(summary.spentSoc || 0);
-    setMaxSpeed(summary.maxSpeed || 0);
+      const summaryResponse = await fetchOrThrow(`/api/reports/summary?${query.toString()}`, {
+        headers: { Accept: 'application/json' },
+      });
+      const summaryRows = await summaryResponse.json();
+      const summary = summaryRows.find(() => true) || {};
+      setDistance(summary.distance || 0);
+      setEngineHours(summary.engineHours || 0);
+      setSpentFuel(summary.spentFuel || 0);
+      setSpentSoc(summary.spentSoc || 0);
+      setMaxSpeed(summary.maxSpeed || 0);
+      setAvgSpeed(summary.averageSpeed || 0);
+    } finally {
+      setLoading(false);
+    }
   }, [id, from, to]);
 
   const handleSubmit = useCatch(async ({ from: nextFrom, to: nextTo }) => {
@@ -137,7 +201,19 @@ const TimelinePage = () => {
     setTo(nextTo);
   });
 
-  const chartColumn = desktop ? 'span 4' : 'span 5';
+  const onSelectTrip = (trip) => {
+    setSelectedTrip((current) => (current === trip ? null : trip));
+  };
+
+  const renderContent = (hasData, node) => {
+    if (loading) {
+      return <Box className={classes.emptyState}>{t('sharedLoading')}</Box>;
+    }
+    if (!hasData) {
+      return <Box className={classes.emptyState}>{t('sharedNoData')}</Box>;
+    }
+    return node;
+  };
 
   return (
     <div className={classes.root}>
@@ -158,7 +234,16 @@ const TimelinePage = () => {
           <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 1.25 }}>
             <TimelineIcon />
           </Avatar>
-          <Typography variant="h6">{deviceName || t('reportReplay')}</Typography>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+              {deviceName || t('reportReplay')}
+            </Typography>
+            {deviceModel && (
+              <Typography variant="caption" color="text.secondary">
+                {deviceModel}
+              </Typography>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -166,77 +251,135 @@ const TimelinePage = () => {
 
       <div className={classes.content}>
         <Box className={classes.grid}>
-          <Paper className={classes.card} sx={{ gridColumn: desktop ? 'span 12' : 'span 5' }}>
-            <Typography variant="h6" className={classes.title}>
-              Timeline
-            </Typography>
-            <Box className={classes.mapCard}>
-              {positions.length ? (
-                <TimelineMap datapositions={positions} deviceId={id} />
-              ) : (
-                <Box className={classes.emptyState}>{t('sharedNoData')}</Box>
-              )}
-            </Box>
-          </Paper>
+          <Box className={classes.statRow}>
+            <SummaryStat
+              label={isEv ? t('alarmPowerOn') : t('reportEngineHours')}
+              value={formatNumericHours(engineHours, t)}
+              icon={<BoltIcon />}
+              accent={theme.palette.secondary.main}
+            />
+            <SummaryStat
+              label={t('sharedDistance')}
+              value={distanceFromMeters(distance, distanceUnit).toFixed(1)}
+              unit={distanceUnitString(distanceUnit, t)}
+              icon={<RouteIcon />}
+              accent={theme.palette.secondary.main}
+            />
+            <SummaryStat
+              label={t('reportAverageSpeed')}
+              value={speedFromKnots(avgSpeed, speedUnit).toFixed(0)}
+              unit={speedUnitString(speedUnit, t)}
+              icon={<SpeedIcon />}
+              accent={theme.palette.secondary.main}
+            />
+            <SummaryStat
+              label={isEv ? t('reportSpentSoc') : t('reportSpentFuel')}
+              value={formatPercentage(isEv ? spentSoc : spentFuel).replace('%', '')}
+              unit="%"
+              icon={isEv ? <EvStationIcon /> : <LocalGasStationIcon />}
+              accent={theme.palette.secondary.main}
+            />
+          </Box>
 
-          <Paper className={classes.card} sx={{ gridColumn: chartColumn }}>
-            <Typography variant="h6" className={classes.title}>
-              {`${deviceCate !== 'ev' ? t('reportEngineHours') : t('alarmPowerOn') } [${formatNumericHours(engineHours, t)}]`}
-            </Typography>
-            <Box className={classes.chartCard}>
-              {routes.length ? (
-                <LineChartAttributes
-                  routesdata={routes}
-                  attr="ignition"
-                  min={0}
-                  max={1.5}
-                  interpola="step"
-                  yaxistick={false}
-                />
-              ) : (
-                <Box className={classes.emptyState}>{t('sharedNoData')}</Box>
-              )}
-            </Box>
-          </Paper>
+          <Box
+            className={classes.mapCard}
+            sx={{ gridColumn: desktop ? 'span 8' : '1 / -1' }}
+          >
+            {!loading && routes.length ? (
+              <TimelineMap datapositions={routes} deviceId={id} selectedTrip={selectedTrip} />
+            ) : (
+              <Paper elevation={0} className={classes.card} sx={{ height: '100%' }}>
+                <Box className={classes.emptyState}>
+                  {loading ? t('sharedLoading') : t('sharedNoData')}
+                </Box>
+              </Paper>
+            )}
+          </Box>
 
-          <Paper className={classes.card} sx={{ gridColumn: chartColumn }}>
-            <Typography variant="h6" className={classes.title}>
-              {`${deviceCate !== 'ev' ? t('reportSpentFuel') : t('reportSpentSoc')} [${formatPercentage(deviceCate !== 'ev' ? spentFuel : spentSoc)}]`}
-            </Typography>
-            <Box className={classes.chartCard}>
-              {routes.length ? (
-                <LineChartAttributes routesdata={routes} attr={deviceCate !== 'ev' ? "fuel" : "soc"} min={0} max={100} />
-              ) : (
-                <Box className={classes.emptyState}>{t('sharedNoData')}</Box>
-              )}
-            </Box>
-          </Paper>
+          <Box
+            className={classes.mapCard}
+            sx={{ gridColumn: desktop ? 'span 4' : '1 / -1' }}
+          >
+            <TripLog
+              trips={trips}
+              selectedTrip={selectedTrip}
+              onSelectTrip={onSelectTrip}
+              isEv={isEv}
+              loading={loading}
+            />
+          </Box>
 
-          <Paper className={classes.card} sx={{ gridColumn: chartColumn }}>
-            <Typography variant="h6" className={classes.title}>
-              {`${t('positionSpeed')} [Max: ${formatSpeed(maxSpeed, speedUnit, t)}]`}
-            </Typography>
-            <Box className={classes.chartCard}>
-              {routes.length ? (
-                <LineChartAttributes routesdata={routes} attr="speed" min={0} max={0} />
-              ) : (
-                <Box className={classes.emptyState}>{t('sharedNoData')}</Box>
-              )}
-            </Box>
-          </Paper>
+          <Box className={classes.chartRow}>
+            <Paper elevation={0} className={classes.card}>
+              <Typography className={classes.title}>
+                {`${isEv ? t('alarmPowerOn') : t('reportEngineHours')} (On)`}
+              </Typography>
+              <Box className={classes.chartCard}>
+                {renderContent(
+                  routes.length,
+                  <LineChartAttributes
+                    routesdata={routes}
+                    attr="ignition"
+                    min={0}
+                    max={1.5}
+                    interpola="step"
+                    yaxistick={false}
+                  />,
+                )}
+              </Box>
+            </Paper>
 
-          <Paper className={classes.card} sx={{ gridColumn: chartColumn }}>
-            <Typography variant="h6" className={classes.title}>
-              {`${t('positionPower')} (${ deviceCate === 'ev' ? "kW" : t('sharedVoltAbbreviation') })`}
-            </Typography>
-            <Box className={classes.chartCard}>
-              {routes.length ? (
-                <LineChartAttributes routesdata={routes} attr={deviceCate === 'ev' ? "remainingPower" : "power"} min={0} max={36} />
-              ) : (
-                <Box className={classes.emptyState}>{t('sharedNoData')}</Box>
-              )}
-            </Box>
-          </Paper>
+            <Paper elevation={0} className={classes.card}>
+              <Typography className={classes.title}>
+                {`${isEv ? t('reportSpentSoc') : t('reportSpentFuel')} (%)`}
+              </Typography>
+              <Box className={classes.chartCard}>
+                {renderContent(
+                  routes.length,
+                  <LineChartAttributes
+                    routesdata={routes}
+                    attr={isEv ? 'soc' : 'fuel'}
+                    min={0}
+                    max={100}
+                  />,
+                )}
+              </Box>
+            </Paper>
+
+            <Paper elevation={0} className={classes.card}>
+              <Typography className={classes.title}>
+                {`${t('positionSpeed')} (MAX:${speedFromKnots(maxSpeed, speedUnit).toFixed(0)} ${speedUnitString(speedUnit, t)})`}
+              </Typography>
+              <Box className={classes.chartCard}>
+                {renderContent(
+                  routes.length,
+                  <LineChartAttributes
+                    routesdata={routes}
+                    attr="speed"
+                    min={0}
+                    max={0}
+                  />,
+                )}
+              </Box>
+            </Paper>
+
+            <Paper elevation={0} className={classes.card}>
+              <Typography className={classes.title}>
+                {`${t('positionPower')} (${isEv ? 'kW' : t('sharedVoltAbbreviation')})`}
+              </Typography>
+              <Box className={classes.chartCard}>
+                {renderContent(
+                  routes.length,
+                  <LineChartAttributes
+                    routesdata={routes}
+                    attr={isEv ? 'remainingPower' : 'power'}
+                    min={0}
+                    max={isEv ? 100 : 30}
+                  />,
+                )}
+              </Box>
+            </Paper>
+          </Box>
         </Box>
       </div>
     </div>
