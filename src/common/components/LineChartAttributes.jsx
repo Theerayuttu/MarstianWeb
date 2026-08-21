@@ -64,6 +64,7 @@ const LineChartAttributes = ({
     <ResponsiveContainer width="100%" height="90%">
       <AreaChart
         data={items}
+        syncId={"anyId"}
         margin={{
           top: 8,
           right: 10,
