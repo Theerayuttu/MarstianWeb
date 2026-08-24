@@ -13,6 +13,7 @@ const LineChartAttributes = ({
   max = 0,
   interpola = 'monotone',
   yaxistick = true,
+  syncId,
 }) => {
   const theme = useTheme();
   const speedUnit = useAttributePreference('speedUnit');
@@ -64,7 +65,7 @@ const LineChartAttributes = ({
     <ResponsiveContainer width="100%" height="90%">
       <AreaChart
         data={items}
-        syncId={"anyId"}
+        syncId={syncId}
         margin={{
           top: 8,
           right: 10,

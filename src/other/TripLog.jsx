@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import NavigationIcon from '@mui/icons-material/Navigation';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import RouteIcon from '@mui/icons-material/Route';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import { useAttributePreference } from '../common/util/preferences';
@@ -139,7 +139,7 @@ const TripLog = ({ trips, selectedTrip, onSelectTrip, isEv, loading }) => {
                 onClick={() => onSelectTrip(trip)}
               >
                 <span className={classes.node}>
-                  <NavigationIcon sx={{ fontSize: 16 }} />
+                  <MyLocationIcon sx={{ fontSize: 16 }} />
                 </span>
                 <Typography className={classes.time}>
                   {`${formatTime(trip.startTime, 'time')} → ${formatTime(trip.endTime, 'time')} : (${formatNumericHours(trip.duration, t, 'h:m')})`}

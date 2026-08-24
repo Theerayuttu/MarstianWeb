@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
@@ -18,28 +18,68 @@ const useStyles = makeStyles()((theme) => ({
     alignItems: 'center',
     gap: theme.spacing(0.5),
     overflowX: 'auto',
+    alignSelf: 'stretch',
+  },
+  pills: {
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    overflow: 'hidden',
+    flexWrap: 'nowrap',
   },
   dateButton: {
     borderRadius: 16,
     padding: theme.spacing(0.75, 1.25),
     minWidth: 72,
+    flexShrink: 0,
     lineHeight: 1,
     whiteSpace: 'nowrap',
   },
 }));
 
-const CalendarLine = ({ handleSubmit, dayslist = 4 }) => {
+const PILL_WIDTH = 72;
+const PILL_GAP = 4;
+
+const CalendarLine = ({ handleSubmit, dayslist }) => {
   const { classes } = useStyles();
 
   const [selectedDate, setSelectedDate] = useState(() => dayjs());
   const [startDate, setStartDate] = useState(() => dayjs());
   const [anchorEl, setAnchorEl] = useState(null);
 
+  const pillsRef = useRef(null);
+  const nextRef = useRef(null);
+  const [autoCount, setAutoCount] = useState(7);
+
+  const days = dayslist ?? autoCount;
+
+  useLayoutEffect(() => {
+    if (dayslist != null) {
+      return undefined;
+    }
+    const element = pillsRef.current;
+    if (!element) {
+      return undefined;
+    }
+    const update = () => {
+      const nextWidth = nextRef.current?.offsetWidth ?? 0;
+      const width = element.clientWidth - nextWidth - PILL_GAP;
+      const count = Math.floor((width + PILL_GAP) / (PILL_WIDTH + PILL_GAP));
+      setAutoCount(Math.min(12, Math.max(1, count)));
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [dayslist]);
+
   const years = useMemo(() => Array.from({ length: 5 }, (_, i) => dayjs().year() + i - 4), []);
 
   const dates = useMemo(
-    () => Array.from({ length: dayslist }, (_, i) => startDate.subtract(dayslist - 1 - i, 'day')),
-    [startDate, dayslist],
+    () => Array.from({ length: days }, (_, i) => startDate.subtract(days - 1 - i, 'day')),
+    [startDate, days],
   );
 
   const emitDate = (date) => {
@@ -95,36 +135,40 @@ const CalendarLine = ({ handleSubmit, dayslist = 4 }) => {
 
       <Box className={classes.dateRow}>
         <IconButton
-          onClick={() => setStartDate((value) => value.subtract(dayslist, 'day'))}
+          onClick={() => setStartDate((value) => value.subtract(days, 'day'))}
           size="small"
         >
           <ArrowBackIosNewIcon fontSize="small" />
         </IconButton>
 
-        {dates.map((date) => {
-          const selected = date.isSame(selectedDate, 'day');
-          return (
-            <Button
-              key={date.format('YYYY-MM-DD')}
-              variant={selected ? 'contained' : 'outlined'}
-              color="primary"
-              className={classes.dateButton}
-              onClick={() => onSelectDate(date)}
-            >
-              <Typography variant="caption" sx={{ mr: 0.5 }}>
-                {date.format('ddd')}
-              </Typography>
-              <Typography variant="caption">{date.format('D')}</Typography>
-            </Button>
-          );
-        })}
+        <Box ref={pillsRef} className={classes.pills}>
+          {dates.map((date) => {
+            const selected = date.isSame(selectedDate, 'day');
+            return (
+              <Button
+                key={date.format('YYYY-MM-DD')}
+                variant={selected ? 'contained' : 'outlined'}
+                color="primary"
+                className={classes.dateButton}
+                onClick={() => onSelectDate(date)}
+              >
+                <Typography variant="caption" sx={{ mr: 0.5 }}>
+                  {date.format('ddd')}
+                </Typography>
+                <Typography variant="caption">{date.format('D')}</Typography>
+              </Button>
+            );
+          })}
 
-        <IconButton
-          onClick={() => setStartDate((value) => value.add(dayslist, 'day'))}
-          size="small"
-        >
-          <ArrowForwardIosIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            ref={nextRef}
+            onClick={() => setStartDate((value) => value.add(days, 'day'))}
+            size="small"
+            sx={{ flexShrink: 0 }}
+          >
+            <ArrowForwardIosIcon fontSize="small" />
+          </IconButton>
+        </Box>
       </Box>
     </Box>
   );

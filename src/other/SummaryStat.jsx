@@ -53,9 +53,16 @@ const useStyles = makeStyles()((theme, { accent }) => ({
     fontSize: '0.8rem',
     color: theme.palette.text.secondary,
   },
+  empty: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'left',
+    color: theme.palette.text.secondary,
+  },
 }));
 
-const SummaryStat = ({ label, value, unit, icon, accent }) => {
+const SummaryStat = ({ label, value, unit, icon, accent, loading }) => {
   const { classes } = useStyles({ accent });
 
   return (
@@ -64,10 +71,14 @@ const SummaryStat = ({ label, value, unit, icon, accent }) => {
         <Typography className={classes.label}>{label}</Typography>
         {icon && <span className={classes.icon}>{icon}</span>}
       </Box>
-      <Box className={classes.valueRow}>
-        <Typography className={classes.value}>{value}</Typography>
-        {unit && <Typography className={classes.unit}>{unit}</Typography>}
-      </Box>
+      {loading ? (
+        <Box className={classes.empty}>{value}</Box>
+      ) : (
+        <Box className={classes.valueRow}>
+          <Typography className={classes.value}>{value}</Typography>
+          {unit && <Typography className={classes.unit}>{unit}</Typography>}
+        </Box>
+      )}
     </Paper>
   );
 };

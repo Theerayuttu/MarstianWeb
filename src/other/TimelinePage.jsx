@@ -14,7 +14,7 @@ import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import ArrowBackIosNew from '@mui/icons-material/ArrowBackIosNew';
 import RouteIcon from '@mui/icons-material/Route';
-import BoltIcon from '@mui/icons-material/Bolt';
+import WorkHistoryIcon from '@mui/icons-material/WorkHistory';
 import SpeedIcon from '@mui/icons-material/Speed';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import EvStationIcon from '@mui/icons-material/EvStation';
@@ -35,8 +35,9 @@ import {
   speedUnitString,
 } from '../common/util/converter';
 import { useAttributePreference } from '../common/util/preferences';
-import TimelineIcon from '../resources/images/data/timeline.svg?react';
 import fetchOrThrow from '../common/util/fetchOrThrow';
+import { mapIconKey, mapIcons } from '../map/core/preloadImages';
+import { green } from '@mui/material/colors';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -112,6 +113,11 @@ const useStyles = makeStyles()((theme) => ({
     justifyContent: 'center',
     color: theme.palette.text.secondary,
   },
+  icon: {
+    width: '32px',
+    height: '32px',
+    filter: 'brightness(0) invert(0)',
+  },
 }));
 
 const TimelinePage = () => {
@@ -150,10 +156,10 @@ const TimelinePage = () => {
 
   const deviceCate = useSelector((state) => {
     const device = state.devices.items[id];
-    return device?.category?.substring(0, 2) || null;
+    return device?.category || null;
   });
 
-  const isEv = deviceCate === 'ev';
+  const isEv = deviceCate.substring(0, 2) === 'ev';
 
   useEffectAsync(async () => {
     if (!id) {
@@ -231,8 +237,8 @@ const TimelinePage = () => {
           <IconButton edge="start" sx={{ mr: 1 }} onClick={() => navigate(-1)}>
             <ArrowBackIosNew />
           </IconButton>
-          <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 1.25 }}>
-            <TimelineIcon />
+          <Avatar sx={{ mr: 1.25 }}>
+            <img className={classes.icon} src={mapIcons[mapIconKey(deviceCate)]} alt="" />
           </Avatar>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
@@ -247,37 +253,41 @@ const TimelinePage = () => {
         </Toolbar>
       </AppBar>
 
-      <CalendarLine handleSubmit={handleSubmit} dayslist={desktop ? 10 : 4} />
+      <CalendarLine handleSubmit={handleSubmit} />
 
       <div className={classes.content}>
         <Box className={classes.grid}>
           <Box className={classes.statRow}>
             <SummaryStat
               label={isEv ? t('alarmPowerOn') : t('reportEngineHours')}
-              value={formatNumericHours(engineHours, t)}
-              icon={<BoltIcon />}
+              value={loading ? t('sharedLoading') : formatNumericHours(engineHours, t)}
+              icon={<WorkHistoryIcon />}
               accent={theme.palette.secondary.main}
+              loading={loading}
             />
             <SummaryStat
               label={t('sharedDistance')}
-              value={distanceFromMeters(distance, distanceUnit).toFixed(1)}
+              value={loading ? t('sharedLoading') : distanceFromMeters(distance, distanceUnit).toFixed(1)}
               unit={distanceUnitString(distanceUnit, t)}
               icon={<RouteIcon />}
               accent={theme.palette.secondary.main}
+              loading={loading}
             />
             <SummaryStat
               label={t('reportAverageSpeed')}
-              value={speedFromKnots(avgSpeed, speedUnit).toFixed(0)}
+              value={loading ? t('sharedLoading') : speedFromKnots(avgSpeed, speedUnit).toFixed(0)}
               unit={speedUnitString(speedUnit, t)}
               icon={<SpeedIcon />}
               accent={theme.palette.secondary.main}
+              loading={loading}
             />
             <SummaryStat
               label={isEv ? t('reportSpentSoc') : t('reportSpentFuel')}
-              value={formatPercentage(isEv ? spentSoc : spentFuel).replace('%', '')}
+              value={loading ? t('sharedLoading') : formatPercentage(isEv ? spentSoc : spentFuel).replace('%', '')}
               unit="%"
               icon={isEv ? <EvStationIcon /> : <LocalGasStationIcon />}
               accent={theme.palette.secondary.main}
+              loading={loading}
             />
           </Box>
 
@@ -324,6 +334,7 @@ const TimelinePage = () => {
                     max={1.5}
                     interpola="step"
                     yaxistick={false}
+                    syncId="timelinePage"
                   />,
                 )}
               </Box>
@@ -341,6 +352,7 @@ const TimelinePage = () => {
                     attr={isEv ? 'soc' : 'fuel'}
                     min={0}
                     max={100}
+                    syncId="timelinePage"
                   />,
                 )}
               </Box>
@@ -358,6 +370,7 @@ const TimelinePage = () => {
                     attr="speed"
                     min={0}
                     max={0}
+                    syncId="timelinePage"
                   />,
                 )}
               </Box>
@@ -375,6 +388,7 @@ const TimelinePage = () => {
                     attr={isEv ? 'remainingPower' : 'power'}
                     min={0}
                     max={isEv ? 100 : 30}
+                    syncId="timelinePage"
                   />,
                 )}
               </Box>
