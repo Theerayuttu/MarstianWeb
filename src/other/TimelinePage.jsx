@@ -266,6 +266,14 @@ const TimelinePage = () => {
               loading={loading}
             />
             <SummaryStat
+              label={isEv ? t('reportSpentSoc') : t('reportSpentFuel')}
+              value={loading ? t('sharedLoading') : formatPercentage(isEv ? spentSoc : spentFuel).replace('%', '')}
+              unit="%"
+              icon={isEv ? <EvStationIcon /> : <LocalGasStationIcon />}
+              accent={theme.palette.secondary.main}
+              loading={loading}
+            />
+            <SummaryStat
               label={t('sharedDistance')}
               value={loading ? t('sharedLoading') : distanceFromMeters(distance, distanceUnit).toFixed(1)}
               unit={distanceUnitString(distanceUnit, t)}
@@ -278,14 +286,6 @@ const TimelinePage = () => {
               value={loading ? t('sharedLoading') : speedFromKnots(avgSpeed, speedUnit).toFixed(0)}
               unit={speedUnitString(speedUnit, t)}
               icon={<SpeedIcon />}
-              accent={theme.palette.secondary.main}
-              loading={loading}
-            />
-            <SummaryStat
-              label={isEv ? t('reportSpentSoc') : t('reportSpentFuel')}
-              value={loading ? t('sharedLoading') : formatPercentage(isEv ? spentSoc : spentFuel).replace('%', '')}
-              unit="%"
-              icon={isEv ? <EvStationIcon /> : <LocalGasStationIcon />}
               accent={theme.palette.secondary.main}
               loading={loading}
             />

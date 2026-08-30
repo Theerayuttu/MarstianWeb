@@ -30,7 +30,7 @@ const useStyles = makeStyles()((theme) => ({
     flexWrap: 'nowrap',
   },
   dateButton: {
-    borderRadius: 16,
+    borderRadius: 12,
     padding: theme.spacing(0.75, 1.25),
     minWidth: 72,
     flexShrink: 0,
