@@ -33,7 +33,6 @@ import useFilter from './useFilter';
 import MainToolbar from './MainToolbar';
 import MainMap from './MainMap';
 import { useAttributePreference } from '../common/util/preferences';
-import { layoutPalette } from '../common/theme/layoutTokens';
 import dayjs from 'dayjs';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ExploreIcon from '@mui/icons-material/Explore';
@@ -53,12 +52,12 @@ const useStyles = makeStyles()((theme) => ({
   root: {
     display: 'flex',
     minHeight: '100vh',
-    backgroundColor: '#eef2f7',
+    backgroundColor: theme.layout.appBackground,
   },
   sidebar: {
     width: '240px',
-    background: layoutPalette.sidebarGradient,
-    color: layoutPalette.sidebarTextPrimary,
+    background: theme.layout.sidebarGradient,
+    color: theme.layout.sidebarTextPrimary,
     display: 'flex',
     flexDirection: 'column',
     padding: theme.spacing(3, 2),
@@ -86,7 +85,7 @@ const useStyles = makeStyles()((theme) => ({
     justifyContent: 'center',
     alignSelf: 'center',
     marginTop: theme.spacing(0.5),
-    backgroundColor: layoutPalette.brandAvatarBackground,
+    backgroundColor: theme.layout.brandAvatarBackground,
     '& img': {
       width: '100%',
       height: '100%',
@@ -103,17 +102,17 @@ const useStyles = makeStyles()((theme) => ({
   navItem: {
     borderRadius: 14,
     padding: theme.spacing(1.5, 2),
-    color: layoutPalette.sidebarTextMuted,
+    color: theme.layout.sidebarTextMuted,
     transition: 'all 180ms ease',
     '& .MuiListItemText-primary': {
       fontSize: '0.95rem',
     },
   },
   navItemActive: {
-    backgroundColor: layoutPalette.navItemActiveBackground,
-    color: layoutPalette.accentContrast,
-    boxShadow: layoutPalette.navItemActiveShadow,
-    border: layoutPalette.navItemActiveBorder,
+    backgroundColor: theme.layout.navItemActiveBackground,
+    color: theme.layout.navItemActiveText,
+    boxShadow: theme.layout.navItemActiveShadow,
+    border: theme.layout.navItemActiveBorder,
   },
   navIcon: {
     color: 'inherit',
@@ -128,7 +127,7 @@ const useStyles = makeStyles()((theme) => ({
     gap: theme.spacing(2),
     padding: theme.spacing(1.5, 1.5, 1, 1),
     borderRadius: 16,
-    backgroundColor: layoutPalette.sidebarCardBackground,
+    backgroundColor: theme.layout.sidebarCardBackground,
     minWidth: 0,
   },
   userInfo: {
@@ -143,10 +142,10 @@ const useStyles = makeStyles()((theme) => ({
   },
   collapseToggle: {
     alignSelf: 'flex-end',
-    color: layoutPalette.sidebarTextPrimary,
-    backgroundColor: layoutPalette.sidebarToggleBg,
+    color: theme.layout.sidebarTextPrimary,
+    backgroundColor: theme.layout.sidebarToggleBg,
     '&:hover': {
-      backgroundColor: layoutPalette.sidebarToggleBgHover,
+      backgroundColor: theme.layout.sidebarToggleBgHover,
     },
   },
   workspace: {
@@ -163,8 +162,8 @@ const useStyles = makeStyles()((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2),
-    backgroundColor: '#fff',
-    boxShadow: '0 25px 60px rgba(8, 22, 52, 0.12)',
+    backgroundColor: theme.layout.topBarBackground,
+    boxShadow: theme.layout.topBarShadow,
   },
   topBarRow: {
     display: 'flex',
@@ -186,8 +185,8 @@ const useStyles = makeStyles()((theme) => ({
     height: '100%',
     minHeight: 520,
     borderRadius: 0,
-    background: 'linear-gradient(135deg, #DDE6F5 0%, #F4F6FB 100%)',
-    boxShadow: '0 40px 80px rgba(7, 20, 45, 0.10)',
+    background: theme.layout.mapSectionBackground,
+    boxShadow: theme.layout.mapSectionShadow,
     overflow: 'hidden',
   },
   dashboardGrid: {
@@ -199,7 +198,7 @@ const useStyles = makeStyles()((theme) => ({
     position: 'relative',
     minHeight: 500,
     borderRadius: 12,
-    border: '1px solid #d6deea',
+    border: theme.layout.cardBorder,
     overflow: 'hidden',
   },
   mapSurface: {
@@ -211,7 +210,7 @@ const useStyles = makeStyles()((theme) => ({
     top: theme.spacing(1),
     left: theme.spacing(1),
     zIndex: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    backgroundColor: theme.layout.liveBadgeBackground,
     borderRadius: 999,
     fontWeight: 700,
     fontSize: '0.78rem',
@@ -224,7 +223,7 @@ const useStyles = makeStyles()((theme) => ({
     width: 8,
     height: 8,
     borderRadius: '50%',
-    backgroundColor: '#00C48C',
+    backgroundColor: theme.layout.liveDotColor,
   },
   metricsStack: {
     display: 'flex',
@@ -241,7 +240,7 @@ const useStyles = makeStyles()((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     borderRadius: 0,
-    boxShadow: '0 35px 70px rgba(4, 25, 60, 0.35)',
+    boxShadow: theme.layout.devicePanelShadow,
     overflow: 'hidden',
     transition: 'opacity 200ms ease, transform 200ms ease',
   },
@@ -252,8 +251,8 @@ const useStyles = makeStyles()((theme) => ({
   },
   totalsCard: {
     padding: theme.spacing(2.5),
-    background: 'linear-gradient(160deg, #001f52 0%, #07285f 100%)',
-    color: '#f5f8ff',
+    background: theme.layout.totalsCardGradient,
+    color: theme.layout.totalsCardText,
     borderRadius: 10,
   },
   totalsHeader: {
@@ -269,47 +268,47 @@ const useStyles = makeStyles()((theme) => ({
   },
   totalMetricTile: {
     borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: theme.layout.totalsTileBackground,
     padding: theme.spacing(1.5),
   },
   avgCard: {
     borderRadius: 10,
-    border: '1px solid #d6deea',
+    border: theme.layout.cardBorder,
     padding: theme.spacing(2.5),
-    backgroundColor: '#f9fbff',
+    backgroundColor: theme.layout.surfaceSubtle,
     minHeight: 170,
   },
   activeCard: {
     marginTop: theme.spacing(2),
     borderRadius: 12,
-    border: '1px solid #dce3ef',
+    border: theme.layout.cardBorderStrong,
     overflow: 'hidden',
   },
   activeCardHeader: {
     padding: theme.spacing(2.5, 3),
-    borderBottom: '1px solid #e5ebf4',
-    backgroundColor: '#f7f9fd',
+    borderBottom: theme.layout.cardHeaderBorder,
+    backgroundColor: theme.layout.cardHeaderBackground,
   },
   tableHeadCell: {
     fontWeight: 700,
     fontSize: '0.76rem',
     textTransform: 'uppercase',
     letterSpacing: 0.7,
-    color: '#6f7f95',
+    color: theme.layout.tableHeadText,
   },
   sidebarDivider: {
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: theme.layout.divider,
   },
   userSubtitle: {
-    color: layoutPalette.sidebarSubtitleText,
+    color: theme.layout.sidebarSubtitleText,
     display: 'block',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
   logoutButton: {
-    color: layoutPalette.accentContrast,
-    borderColor: layoutPalette.logoutBorder,
+    color: theme.layout.logoutText,
+    borderColor: theme.layout.logoutBorder,
     marginLeft: 'auto',
     textTransform: 'none',
     flexShrink: 0,
@@ -320,9 +319,9 @@ const useStyles = makeStyles()((theme) => ({
     gap: theme.spacing(0.5),
   },
   iconButton: {
-    backgroundColor: '#f2f4fb',
+    backgroundColor: theme.layout.iconButtonBackground,
     '&:hover': {
-      backgroundColor: '#e8eafb',
+      backgroundColor: theme.layout.iconButtonBackgroundHover,
     },
   },
   mobileBottomMenu: {
@@ -382,7 +381,7 @@ const useStyles = makeStyles()((theme) => ({
       width: '100%',
       maxHeight: 'none',
       marginTop: theme.spacing(2),
-      boxShadow: '0 12px 30px rgba(4,25,60,0.15)',
+      boxShadow: theme.layout.devicePanelShadowMobile,
     },
   },
 }));

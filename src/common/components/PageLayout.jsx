@@ -79,8 +79,8 @@ const useStyles = makeStyles()((theme, { miniVariant }) => ({
     display: 'flex',
     flexDirection: 'column',
     minHeight: '100%',
-    background: 'linear-gradient(180deg, #03183E 0%, #051129 100%)',
-    color: '#f4f7ff',
+    background: theme.layout.sidebarGradient,
+    color: theme.layout.sidebarTextPrimary,
   },
   drawerToolbar: {
     padding: theme.spacing(3, 2, 1.5),
@@ -118,7 +118,7 @@ const useStyles = makeStyles()((theme, { miniVariant }) => ({
     '& .MuiListItemIcon-root': {
       minWidth: 0,
       margin: 0,
-      color: '#f4f7ff',
+      color: theme.layout.sidebarTextPrimary,
     },
     '& .MuiListItemText-root': {
       display: 'none',
@@ -186,7 +186,8 @@ const PageLayout = ({ menu, breadcrumbs, children }) => {
             <>
               <IconButton
                 edge="start"
-                sx={{ mr: 1, color: '#f4f7ff' }}
+                color="inherit"
+                sx={{ mr: 1 }}
                 onClick={() => navigate('/')}
               >
                 <BackIcon />
@@ -195,7 +196,7 @@ const PageLayout = ({ menu, breadcrumbs, children }) => {
             </>
           )}
           <div className={classes.drawerToolbarActions}>
-            <IconButton sx={{ color: '#f4f7ff' }} onClick={toggleDrawer}>
+            <IconButton color="inherit" onClick={toggleDrawer}>
               {miniVariant !== (theme.direction === 'rtl') ? <MenuRounded /> : <MenuOpenRounded />}
             </IconButton>
           </div>

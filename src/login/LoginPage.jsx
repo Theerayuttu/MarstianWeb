@@ -42,7 +42,7 @@ const useStyles = makeStyles()((theme) => ({
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    background: 'linear-gradient(180deg, #F8F5F2 0%, #FDFDFB 40%, #F3F7F6 100%)',
+    background: theme.layout.loginBackground,
     padding: theme.spacing(4, 6),
     [theme.breakpoints.down('md')]: {
       padding: theme.spacing(3, 2),
@@ -74,10 +74,10 @@ const useStyles = makeStyles()((theme) => ({
   card: {
     width: '100%',
     maxWidth: 420,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.layout.loginCardBackground,
     borderRadius: 24,
     padding: theme.spacing(5),
-    boxShadow: '0px 40px 80px rgba(12, 61, 96, 0.08)',
+    boxShadow: theme.layout.loginCardShadow,
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2.5),
@@ -91,7 +91,7 @@ const useStyles = makeStyles()((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    boxShadow: '0px 15px 30px rgba(14,34,68,0.25)',
+    boxShadow: theme.layout.loginAvatarShadow,
     marginTop: theme.spacing(1),
     '& img': {
       width: '100%',
@@ -108,7 +108,7 @@ const useStyles = makeStyles()((theme) => ({
     fontSize: '0.85rem',
     fontWeight: 700,
     letterSpacing: 1,
-    color: '#0E2244',
+    color: theme.layout.loginLabelText,
   },
   footer: {
     display: 'flex',
@@ -116,7 +116,7 @@ const useStyles = makeStyles()((theme) => ({
     flexWrap: 'wrap',
     gap: theme.spacing(1.5),
     marginTop: theme.spacing(6),
-    color: '#5E6470',
+    color: theme.layout.loginMutedText,
     fontSize: '0.85rem',
   },
   footerLinks: {
@@ -127,26 +127,26 @@ const useStyles = makeStyles()((theme) => ({
   infoText: {
     textAlign: 'center',
     fontSize: '0.85rem',
-    color: '#5E6470',
+    color: theme.layout.loginMutedText,
   },
   resetPassword: {
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
     fontSize: '0.85rem',
-    color: '#5E6470',
+    color: theme.layout.loginMutedText,
   },
   link: {
     cursor: 'pointer',
     fontWeight: 600,
-    color: '#0E2244',
+    color: theme.layout.loginLinkText,
   },
   primaryButton: {
     borderRadius: 999,
     padding: theme.spacing(1.5),
     fontWeight: 700,
     letterSpacing: 1,
-    boxShadow: '0px 14px 35px rgba(8, 31, 79, 0.25)',
+    boxShadow: theme.layout.loginButtonShadow,
   },
   secondaryLink: {
     fontWeight: 600,
@@ -300,7 +300,7 @@ const LoginPage = () => {
             <img src="/marstianicon.png" alt="MARSTIAN" width="30%" />
           </div>
           <Stack spacing={0.5} textAlign="center">
-            <Typography variant="body2" color="#475467">
+            <Typography variant="body2" color="text.secondary">
               Secure access to MARSTIAN Application
             </Typography>
           </Stack>

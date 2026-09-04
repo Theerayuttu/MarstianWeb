@@ -11,7 +11,6 @@ import {
   Badge,
 } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import { layoutPalette } from '../theme/layoutTokens';
 
 import AssessmentRounded from '@mui/icons-material/AssessmentRounded';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -24,18 +23,18 @@ import { useTranslation } from './LocalizationProvider';
 import { useRestriction } from '../util/permissions';
 import { nativePostMessage } from './NativeInterface';
 
-const useStyles = makeStyles()(() => ({
+const useStyles = makeStyles()((theme) => ({
   bar: {
-    background: layoutPalette.sidebarGradient,
-    color: layoutPalette.sidebarTextPrimary,
+    background: theme.layout.sidebarGradient,
+    color: theme.layout.sidebarTextPrimary,
     borderRadius: 0,
   },
   navigation: {
     background: 'transparent',
     '& .MuiBottomNavigationAction-root': {
-      color: layoutPalette.bottomNavText,
+      color: theme.layout.bottomNavText,
       '&.Mui-selected': {
-        color: layoutPalette.accentContrast,
+        color: theme.layout.bottomNavSelectedText,
       },
     },
     '& .MuiSvgIcon-root': {

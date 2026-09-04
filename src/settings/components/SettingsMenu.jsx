@@ -20,12 +20,11 @@ import { useTranslation } from '../../common/components/LocalizationProvider';
 import { useAdministrator, useManager, useRestriction } from '../../common/util/permissions';
 import useFeatures from '../../common/util/useFeatures';
 import { makeStyles } from 'tss-react/mui';
-import { layoutPalette } from '../../common/theme/layoutTokens';
 
 const useStyles = makeStyles()((theme) => ({
   sidebar: {
-    background: layoutPalette.sidebarGradient,
-    color: layoutPalette.sidebarTextPrimary,
+    background: theme.layout.sidebarGradient,
+    color: theme.layout.sidebarTextPrimary,
     padding: theme.spacing(2.5, 2),
     display: 'flex',
     flexDirection: 'column',
@@ -46,7 +45,7 @@ const useStyles = makeStyles()((theme) => ({
   navItem: {
     borderRadius: 14,
     padding: theme.spacing(1.1, 1.5),
-    color: layoutPalette.sidebarTextMuted,
+    color: theme.layout.sidebarTextMuted,
     transition: 'all 160ms ease',
     '& .MuiListItemIcon-root': {
       minWidth: 38,
@@ -57,13 +56,13 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
   navItemActive: {
-    background: layoutPalette.navItemActiveBackground,
-    color: layoutPalette.accentContrast,
-    boxShadow: layoutPalette.navItemActiveShadow,
-    border: layoutPalette.navItemActiveBorder,
+    background: theme.layout.navItemActiveBackground,
+    color: theme.layout.navItemActiveText,
+    boxShadow: theme.layout.navItemActiveShadow,
+    border: theme.layout.navItemActiveBorder,
   },
   divider: {
-    borderColor: layoutPalette.divider,
+    borderColor: theme.layout.divider,
   },
 }));
 

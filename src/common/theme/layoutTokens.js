@@ -1,4 +1,7 @@
-export const layoutPalette = {
+import { alpha, lighten } from '@mui/material/styles';
+
+// Light mode keeps the original deep-blue chrome verbatim.
+const lightTokens = {
   sidebarGradient: 'linear-gradient(180deg, #03183E 0%, #051129 100%)',
   sidebarTextPrimary: '#f4f7ff',
   sidebarTextMuted: 'rgba(255,255,255,0.72)',
@@ -10,10 +13,108 @@ export const layoutPalette = {
   divider: 'rgba(255,255,255,0.12)',
   dividerSoft: 'rgba(255,255,255,0.15)',
   logoutBorder: 'rgba(255,255,255,0.4)',
+  logoutText: '#fff',
   navItemActiveBackground: '#1b3a7a',
+  navItemActiveText: '#fff',
   navItemActiveShadow: '0 20px 35px rgba(6, 19, 50, 0.55)',
   navItemActiveBorder: '1px solid rgba(255,255,255,0.25)',
   accentPrimary: '#1b3a7a',
   accentContrast: '#fff',
   bottomNavText: 'rgba(244,247,255,0.72)',
+  bottomNavSelectedText: '#fff',
+
+  appBackground: '#eef2f7',
+  topBarBackground: '#fff',
+  topBarShadow: '0 25px 60px rgba(8, 22, 52, 0.12)',
+  mapSectionBackground: 'linear-gradient(135deg, #DDE6F5 0%, #F4F6FB 100%)',
+  mapSectionShadow: '0 40px 80px rgba(7, 20, 45, 0.10)',
+  cardBorder: '1px solid #d6deea',
+  cardBorderStrong: '1px solid #dce3ef',
+  cardHeaderBorder: '1px solid #e5ebf4',
+  cardHeaderBackground: '#f7f9fd',
+  surfaceSubtle: '#f9fbff',
+  devicePanelShadow: '0 35px 70px rgba(4, 25, 60, 0.35)',
+  devicePanelShadowMobile: '0 12px 30px rgba(4,25,60,0.15)',
+  liveBadgeBackground: 'rgba(255, 255, 255, 0.94)',
+  liveDotColor: '#00C48C',
+  totalsCardGradient: 'linear-gradient(160deg, #001f52 0%, #07285f 100%)',
+  totalsCardText: '#f5f8ff',
+  totalsTileBackground: 'rgba(255,255,255,0.06)',
+  tableHeadText: '#6f7f95',
+  iconButtonBackground: '#f2f4fb',
+  iconButtonBackgroundHover: '#e8eafb',
+  searchFieldBackground: '#f5f5f5',
+
+  loginBackground: 'linear-gradient(180deg, #F8F5F2 0%, #FDFDFB 40%, #F3F7F6 100%)',
+  loginCardBackground: '#FFFFFF',
+  loginCardShadow: '0px 40px 80px rgba(12, 61, 96, 0.08)',
+  loginAvatarShadow: '0px 15px 30px rgba(14,34,68,0.25)',
+  loginLabelText: '#0E2244',
+  loginMutedText: '#5E6470',
+  loginLinkText: '#0E2244',
+  loginButtonShadow: '0px 14px 35px rgba(8, 31, 79, 0.25)',
 };
+
+// Dark mode derives every surface from the active palette.
+const darkTokens = ({ palette }) => {
+  const white = palette.common.white;
+  const black = palette.common.black;
+  const paper = palette.background.paper;
+  const raised = lighten(paper, 0.06);
+
+  return {
+    sidebarGradient: `linear-gradient(180deg, ${raised} 0%, ${paper} 100%)`,
+    sidebarTextPrimary: palette.text.primary,
+    sidebarTextMuted: palette.text.secondary,
+    sidebarSubtitleText: palette.text.secondary,
+    sidebarCardBackground: alpha(white, 0.06),
+    sidebarToggleBg: alpha(white, 0.08),
+    sidebarToggleBgHover: alpha(white, 0.16),
+    brandAvatarBackground: alpha(white, 0.12),
+    divider: palette.divider,
+    dividerSoft: palette.divider,
+    logoutBorder: alpha(white, 0.3),
+    logoutText: palette.text.primary,
+    navItemActiveBackground: alpha(palette.primary.main, 0.24),
+    navItemActiveText: palette.primary.main,
+    navItemActiveShadow: `0 12px 28px ${alpha(black, 0.6)}`,
+    navItemActiveBorder: `1px solid ${alpha(palette.primary.main, 0.5)}`,
+    accentPrimary: palette.primary.main,
+    accentContrast: palette.primary.contrastText,
+    bottomNavText: palette.text.secondary,
+    bottomNavSelectedText: palette.primary.main,
+
+    appBackground: palette.background.default,
+    topBarBackground: paper,
+    topBarShadow: `0 8px 24px ${alpha(black, 0.6)}`,
+    mapSectionBackground: `linear-gradient(135deg, ${raised} 0%, ${palette.background.default} 100%)`,
+    mapSectionShadow: `0 24px 60px ${alpha(black, 0.55)}`,
+    cardBorder: `1px solid ${palette.divider}`,
+    cardBorderStrong: `1px solid ${palette.divider}`,
+    cardHeaderBorder: `1px solid ${palette.divider}`,
+    cardHeaderBackground: alpha(white, 0.04),
+    surfaceSubtle: alpha(white, 0.04),
+    devicePanelShadow: `0 24px 60px ${alpha(black, 0.7)}`,
+    devicePanelShadowMobile: `0 12px 30px ${alpha(black, 0.6)}`,
+    liveBadgeBackground: alpha(paper, 0.9),
+    liveDotColor: '#00C48C',
+    totalsCardGradient: `linear-gradient(160deg, ${lighten(paper, 0.1)} 0%, ${paper} 100%)`,
+    totalsCardText: palette.text.primary,
+    totalsTileBackground: alpha(white, 0.06),
+    tableHeadText: palette.text.secondary,
+    iconButtonBackground: alpha(white, 0.08),
+    iconButtonBackgroundHover: alpha(white, 0.16),
+    searchFieldBackground: alpha(white, 0.08),
+
+    loginBackground: `linear-gradient(180deg, ${palette.background.default} 0%, ${paper} 100%)`,
+    loginCardBackground: paper,
+    loginCardShadow: `0px 24px 60px ${alpha(black, 0.6)}`,
+    loginAvatarShadow: `0px 12px 30px ${alpha(black, 0.6)}`,
+    loginLabelText: palette.text.primary,
+    loginMutedText: palette.text.secondary,
+    loginLinkText: palette.primary.main,
+    loginButtonShadow: `0px 14px 35px ${alpha(black, 0.6)}`,
+  };
+};
+
+export default (theme) => (theme.palette.mode === 'dark' ? darkTokens(theme) : lightTokens);

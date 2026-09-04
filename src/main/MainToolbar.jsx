@@ -30,7 +30,6 @@ import ListIcon from '@mui/icons-material/List';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import { useDeviceReadonly } from '../common/util/permissions';
 import DeviceRow from './DeviceRow';
-import { layoutPalette } from '../common/theme/layoutTokens';
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 
 const useStyles = makeStyles()((theme) => ({
@@ -62,8 +61,8 @@ const useStyles = makeStyles()((theme) => ({
     width: theme.dimensions.drawerWidthTablet,
   },
   plusIcon: {
-    color: layoutPalette.accentContrast,
-    background: layoutPalette.accentPrimary,
+    color: theme.layout.accentContrast,
+    background: theme.layout.accentPrimary,
     borderRadius: '15%',
   },
 }));
@@ -138,7 +137,7 @@ const MainToolbar = ({
           size="small"
           fullWidth
           sx={{
-            backgroundColor: 'grey.100',
+            backgroundColor: theme.layout.searchFieldBackground,
             borderRadius: '14px',
           }}
         />
