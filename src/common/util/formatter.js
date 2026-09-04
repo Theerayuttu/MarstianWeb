@@ -46,7 +46,7 @@ export const formatTime = (value, format) => {
       case 'date':
         return d.toLocaleDateString(undefined, dateConfig);
       case 'time':
-        return d.toLocaleTimeString(undefined, secondConfig);
+        return d.toLocaleTimeString(undefined, minuteConfig);
       case 'minutes':
         return d.toLocaleString(undefined, { ...dateConfig, ...minuteConfig });
       default:

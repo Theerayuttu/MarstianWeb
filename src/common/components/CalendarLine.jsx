@@ -3,6 +3,7 @@ import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@mui/materi
 import { makeStyles } from 'tss-react/mui';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import dayjs from 'dayjs';
 
 const useStyles = makeStyles()((theme) => ({
@@ -12,6 +13,10 @@ const useStyles = makeStyles()((theme) => ({
     gap: theme.spacing(1),
     padding: theme.spacing(1.5, 2),
     alignItems: 'flex-start',
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
   },
   dateRow: {
     display: 'flex',
@@ -42,7 +47,7 @@ const useStyles = makeStyles()((theme) => ({
 const PILL_WIDTH = 72;
 const PILL_GAP = 4;
 
-const CalendarLine = ({ handleSubmit, dayslist }) => {
+const CalendarLine = ({ handleSubmit, dayslist, onBack, startAction }) => {
   const { classes } = useStyles();
 
   const [selectedDate, setSelectedDate] = useState(() => dayjs());
@@ -97,9 +102,17 @@ const CalendarLine = ({ handleSubmit, dayslist }) => {
 
   return (
     <Box className={classes.root}>
-      <Button onClick={(event) => setAnchorEl(event.currentTarget)}>
-        <Typography variant="h6">{selectedDate.format('MMMM YYYY')}</Typography>
-      </Button>
+      <Box className={classes.header}>
+        {startAction}
+        {!startAction && onBack && (
+          <IconButton edge="start" sx={{ mr: 1 }} onClick={onBack}>
+            <ArrowBackIcon />
+          </IconButton>
+        )}
+        <Button onClick={(event) => setAnchorEl(event.currentTarget)}>
+          <Typography variant="h6">{selectedDate.format('MMMM YYYY')}</Typography>
+        </Button>
+      </Box>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         {Array.from({ length: 12 }, (_, index) => (

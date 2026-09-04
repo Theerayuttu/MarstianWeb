@@ -92,7 +92,7 @@ const LineChartAttributes = ({
             color: theme.palette.text.primary,
           }}
           formatter={(value) => [value, attr]}
-          labelFormatter={(value) => formatTime(value, 'seconds')}
+          labelFormatter={(value) => formatTime(value, 'time')}
         />
         <Area
           type={interpola}

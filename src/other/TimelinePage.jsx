@@ -1,23 +1,13 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
-  AppBar,
-  Avatar,
   Box,
-  IconButton,
   Paper,
-  Toolbar,
   Typography,
   useMediaQuery,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
-import ArrowBackIosNew from '@mui/icons-material/ArrowBackIosNew';
-import RouteIcon from '@mui/icons-material/Route';
-import WorkHistoryIcon from '@mui/icons-material/WorkHistory';
-import SpeedIcon from '@mui/icons-material/Speed';
-import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
-import EvStationIcon from '@mui/icons-material/EvStation';
 import { useNavigate, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useEffectAsync, useCatch } from '../reactHelper';
@@ -25,9 +15,8 @@ import { useTranslation } from '../common/components/LocalizationProvider';
 import CalendarLine from '../common/components/CalendarLine';
 import TimelineMap from './TimelineMap';
 import TripLog from './TripLog';
-import SummaryStat from './SummaryStat';
 import LineChartAttributes from '../common/components/LineChartAttributes';
-import { formatNumericHours, formatPercentage, formatSpeed } from '../common/util/formatter';
+import { formatNumericHours, formatPercentage, } from '../common/util/formatter';
 import {
   distanceFromMeters,
   distanceUnitString,
@@ -36,8 +25,6 @@ import {
 } from '../common/util/converter';
 import { useAttributePreference } from '../common/util/preferences';
 import fetchOrThrow from '../common/util/fetchOrThrow';
-import { mapIconKey, mapIcons } from '../map/core/preloadImages';
-import { green } from '@mui/material/colors';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -56,15 +43,6 @@ const useStyles = makeStyles()((theme) => ({
     gap: theme.spacing(2),
     [theme.breakpoints.down('md')]: {
       gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
-    },
-  },
-  statRow: {
-    gridColumn: '1 / -1',
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-    gap: theme.spacing(2),
-    [theme.breakpoints.down('md')]: {
-      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
     },
   },
   chartRow: {
@@ -91,7 +69,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   title: {
     fontWeight: 800,
-    fontSize: '0.7rem',
+    fontSize: '0.875rem',
     letterSpacing: '0em',
     textTransform: 'uppercase',
     color: theme.palette.text.secondary,
@@ -112,11 +90,6 @@ const useStyles = makeStyles()((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     color: theme.palette.text.secondary,
-  },
-  icon: {
-    width: '32px',
-    height: '32px',
-    filter: 'brightness(0) invert(0)',
   },
 }));
 
@@ -144,22 +117,12 @@ const TimelinePage = () => {
   const [maxSpeed, setMaxSpeed] = useState(0);
   const [avgSpeed, setAvgSpeed] = useState(0);
 
-  const deviceName = useSelector((state) => {
-    const device = state.devices.items[id];
-    return device?.name || null;
-  });
-
-  const deviceModel = useSelector((state) => {
-    const device = state.devices.items[id];
-    return device?.model || device?.category || null;
-  });
-
   const deviceCate = useSelector((state) => {
     const device = state.devices.items[id];
     return device?.category || null;
   });
 
-  const isEv = deviceCate.substring(0, 2) === 'ev';
+  const isEv = deviceCate?.substring(0, 2) === 'ev';
 
   useEffectAsync(async () => {
     if (!id) {
@@ -223,74 +186,10 @@ const TimelinePage = () => {
 
   return (
     <div className={classes.root}>
-      <AppBar
-        position="sticky"
-        color="transparent"
-        elevation={0}
-        sx={{
-          backdropFilter: 'blur(4px)',
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          background: `linear-gradient(90deg, ${theme.palette.primary.main}1A 0%, ${theme.palette.background.default} 100%)`,
-        }}
-      >
-        <Toolbar>
-          <IconButton edge="start" sx={{ mr: 1 }} onClick={() => navigate(-1)}>
-            <ArrowBackIosNew />
-          </IconButton>
-          <Avatar sx={{ mr: 1.25 }}>
-            <img className={classes.icon} src={mapIcons[mapIconKey(deviceCate)]} alt="" />
-          </Avatar>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-              {deviceName || t('reportReplay')}
-            </Typography>
-            {deviceModel && (
-              <Typography variant="caption" color="text.secondary">
-                {deviceModel}
-              </Typography>
-            )}
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <CalendarLine handleSubmit={handleSubmit} />
+      <CalendarLine handleSubmit={handleSubmit} onBack={() => navigate(-1)} />
 
       <div className={classes.content}>
         <Box className={classes.grid}>
-          <Box className={classes.statRow}>
-            <SummaryStat
-              label={isEv ? t('alarmPowerOn') : t('reportEngineHours')}
-              value={loading ? t('sharedLoading') : formatNumericHours(engineHours, t)}
-              icon={<WorkHistoryIcon />}
-              accent={theme.palette.secondary.main}
-              loading={loading}
-            />
-            <SummaryStat
-              label={isEv ? t('reportSpentSoc') : t('reportSpentFuel')}
-              value={loading ? t('sharedLoading') : formatPercentage(isEv ? spentSoc : spentFuel).replace('%', '')}
-              unit="%"
-              icon={isEv ? <EvStationIcon /> : <LocalGasStationIcon />}
-              accent={theme.palette.secondary.main}
-              loading={loading}
-            />
-            <SummaryStat
-              label={t('sharedDistance')}
-              value={loading ? t('sharedLoading') : distanceFromMeters(distance, distanceUnit).toFixed(1)}
-              unit={distanceUnitString(distanceUnit, t)}
-              icon={<RouteIcon />}
-              accent={theme.palette.secondary.main}
-              loading={loading}
-            />
-            <SummaryStat
-              label={t('reportAverageSpeed')}
-              value={loading ? t('sharedLoading') : speedFromKnots(avgSpeed, speedUnit).toFixed(0)}
-              unit={speedUnitString(speedUnit, t)}
-              icon={<SpeedIcon />}
-              accent={theme.palette.secondary.main}
-              loading={loading}
-            />
-          </Box>
-
           <Box
             className={classes.mapCard}
             sx={{ gridColumn: desktop ? 'span 8' : '1 / -1' }}
@@ -322,7 +221,7 @@ const TimelinePage = () => {
           <Box className={classes.chartRow}>
             <Paper elevation={0} className={classes.card}>
               <Typography className={classes.title}>
-                {`${isEv ? t('alarmPowerOn') : t('reportEngineHours')} (On)`}
+                {`${isEv ? t('alarmPowerOn') : t('reportEngineHours')} : ${loading ? t('sharedLoading') : formatNumericHours(engineHours, t)}`}
               </Typography>
               <Box className={classes.chartCard}>
                 {renderContent(
@@ -342,7 +241,7 @@ const TimelinePage = () => {
 
             <Paper elevation={0} className={classes.card}>
               <Typography className={classes.title}>
-                {`${isEv ? t('reportSpentSoc') : t('reportSpentFuel')} (%)`}
+                {`${isEv ? t('reportSpentSoc') : t('reportSpentFuel')} : ${loading ? t('sharedLoading') : formatPercentage(isEv ? spentSoc : spentFuel)}`}
               </Typography>
               <Box className={classes.chartCard}>
                 {renderContent(
@@ -360,7 +259,7 @@ const TimelinePage = () => {
 
             <Paper elevation={0} className={classes.card}>
               <Typography className={classes.title}>
-                {`${t('positionSpeed')} (MAX:${speedFromKnots(maxSpeed, speedUnit).toFixed(0)} ${speedUnitString(speedUnit, t)})`}
+                {`${t('reportMaximumSpeed')} : ${speedFromKnots(maxSpeed, speedUnit).toFixed(0)} ${speedUnitString(speedUnit, t)}, ${t('sharedDistance')} : ${loading ? t('sharedLoading') : distanceFromMeters(distance, distanceUnit).toFixed(1)} ${distanceUnitString(distanceUnit, t)}`}
               </Typography>
               <Box className={classes.chartCard}>
                 {renderContent(
