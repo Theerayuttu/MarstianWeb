@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
@@ -14,6 +14,7 @@ const LineChartAttributes = ({
   interpola = 'monotone',
   yaxistick = true,
   syncId,
+  onRangeChange,
 }) => {
   const theme = useTheme();
   const speedUnit = useAttributePreference('speedUnit');
@@ -55,6 +56,14 @@ const LineChartAttributes = ({
     const values = items.map((item) => item[attr]);
     return [Math.min(...values), Math.max(...values)];
   }, [items, attr]);
+
+  // Kept in a ref so an inline callback from the parent does not re-trigger the effect.
+  const onRangeChangeRef = useRef(onRangeChange);
+  onRangeChangeRef.current = onRangeChange;
+
+  useEffect(() => {
+    onRangeChangeRef.current?.({ min: minValue, max: maxValue, count: items.length });
+  }, [minValue, maxValue, items.length]);
 
   const yDomain =
     min + max === 0 ? [minValue, Math.max(maxValue + maxValue / 4, minValue + 1)] : [min, max];

@@ -9,10 +9,20 @@ import dayjs from 'dayjs';
 const useStyles = makeStyles()((theme) => ({
   root: {
     display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+    padding: theme.spacing(1.5, 2),
+  },
+  main: {
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(1),
-    padding: theme.spacing(1.5, 2),
     alignItems: 'flex-start',
+  },
+  end: {
+    flexShrink: 0,
   },
   header: {
     display: 'flex',
@@ -36,8 +46,9 @@ const useStyles = makeStyles()((theme) => ({
   },
   dateButton: {
     borderRadius: 12,
-    padding: theme.spacing(0.75, 1.25),
+    padding: theme.spacing(0, 1.25),
     minWidth: 72,
+    height: 36,
     flexShrink: 0,
     lineHeight: 1,
     whiteSpace: 'nowrap',
@@ -47,7 +58,7 @@ const useStyles = makeStyles()((theme) => ({
 const PILL_WIDTH = 72;
 const PILL_GAP = 4;
 
-const CalendarLine = ({ handleSubmit, dayslist, onBack, startAction }) => {
+const CalendarLine = ({ handleSubmit, dayslist, onBack, startAction, endAction }) => {
   const { classes } = useStyles();
 
   const [selectedDate, setSelectedDate] = useState(() => dayjs());
@@ -102,87 +113,93 @@ const CalendarLine = ({ handleSubmit, dayslist, onBack, startAction }) => {
 
   return (
     <Box className={classes.root}>
-      <Box className={classes.header}>
-        {startAction}
-        {!startAction && onBack && (
-          <IconButton edge="start" sx={{ mr: 1 }} onClick={onBack}>
-            <ArrowBackIcon />
-          </IconButton>
-        )}
-        <Button onClick={(event) => setAnchorEl(event.currentTarget)}>
-          <Typography variant="h6">{selectedDate.format('MMMM YYYY')}</Typography>
-        </Button>
-      </Box>
+      <Box className={classes.main}>
+        <Box className={classes.header}>
+          {startAction}
+          {!startAction && onBack && (
+            <IconButton edge="start" sx={{ mr: 1 }} onClick={onBack}>
+              <ArrowBackIcon />
+            </IconButton>
+          )}
+          <Button onClick={(event) => setAnchorEl(event.currentTarget)}>
+            <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+              {selectedDate.format('MMMM YYYY')}
+            </Typography>
+          </Button>
+        </Box>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-        {Array.from({ length: 12 }, (_, index) => (
-          <MenuItem
-            key={`month-${index}`}
-            onClick={() => {
-              const next = startDate.month(index);
-              setStartDate(next);
-              setSelectedDate(next);
-              emitDate(next);
-              setAnchorEl(null);
-            }}
-          >
-            {dayjs().month(index).format('MMMM')}
-          </MenuItem>
-        ))}
-        <MenuItem disabled>──────────</MenuItem>
-        {years.map((year) => (
-          <MenuItem
-            key={`year-${year}`}
-            onClick={() => {
-              const next = startDate.year(year);
-              setStartDate(next);
-              setSelectedDate(next);
-              emitDate(next);
-              setAnchorEl(null);
-            }}
-          >
-            {year}
-          </MenuItem>
-        ))}
-      </Menu>
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+          {Array.from({ length: 12 }, (_, index) => (
+            <MenuItem
+              key={`month-${index}`}
+              onClick={() => {
+                const next = startDate.month(index);
+                setStartDate(next);
+                setSelectedDate(next);
+                emitDate(next);
+                setAnchorEl(null);
+              }}
+            >
+              {dayjs().month(index).format('MMMM')}
+            </MenuItem>
+          ))}
+          <MenuItem disabled>──────────</MenuItem>
+          {years.map((year) => (
+            <MenuItem
+              key={`year-${year}`}
+              onClick={() => {
+                const next = startDate.year(year);
+                setStartDate(next);
+                setSelectedDate(next);
+                emitDate(next);
+                setAnchorEl(null);
+              }}
+            >
+              {year}
+            </MenuItem>
+          ))}
+        </Menu>
 
-      <Box className={classes.dateRow}>
-        <IconButton
-          onClick={() => setStartDate((value) => value.subtract(days, 'day'))}
-          size="small"
-        >
-          <ArrowBackIosNewIcon fontSize="small" />
-        </IconButton>
-
-        <Box ref={pillsRef} className={classes.pills}>
-          {dates.map((date) => {
-            const selected = date.isSame(selectedDate, 'day');
-            return (
-              <Button
-                key={date.format('YYYY-MM-DD')}
-                variant={selected ? 'contained' : 'outlined'}
-                color="primary"
-                className={classes.dateButton}
-                onClick={() => onSelectDate(date)}
-              >
-                <Typography variant="caption" sx={{ mr: 0.5 }}>
-                  {date.format('ddd')}
-                </Typography>
-                <Typography variant="caption">{date.format('D')}</Typography>
-              </Button>
-            );
-          })}
-
+        <Box className={classes.dateRow}>
           <IconButton
-            ref={nextRef}
-            onClick={() => setStartDate((value) => value.add(days, 'day'))}
+            onClick={() => setStartDate((value) => value.subtract(days, 'day'))}
             size="small"
-            sx={{ flexShrink: 0 }}
           >
-            <ArrowForwardIosIcon fontSize="small" />
+            <ArrowBackIosNewIcon fontSize="small" />
           </IconButton>
+
+          <Box ref={pillsRef} className={classes.pills}>
+            {dates.map((date) => {
+              const selected = date.isSame(selectedDate, 'day');
+              return (
+                <Button
+                  key={date.format('YYYY-MM-DD')}
+                  variant={selected ? 'contained' : 'outlined'}
+                  color="secondary"
+                  className={classes.dateButton}
+                  onClick={() => onSelectDate(date)}
+                >
+                  <Typography variant="caption" sx={{ mr: 0.5 }}>
+                    {date.format('ddd')}
+                  </Typography>
+                  <Typography variant="caption">{date.format('D')}</Typography>
+                </Button>
+              );
+            })}
+
+            <IconButton
+              ref={nextRef}
+              onClick={() => setStartDate((value) => value.add(days, 'day'))}
+              size="small"
+              sx={{ flexShrink: 0 }}
+            >
+              <ArrowForwardIosIcon fontSize="small" />
+            </IconButton>
+          </Box>
         </Box>
       </Box>
+
+      {endAction && <Box className={classes.end}>{endAction}</Box>}
     </Box>
   );
 };

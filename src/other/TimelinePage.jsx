@@ -5,6 +5,7 @@ import {
   Paper,
   Typography,
   useMediaQuery,
+  Chip,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
@@ -18,13 +19,17 @@ import TripLog from './TripLog';
 import LineChartAttributes from '../common/components/LineChartAttributes';
 import { formatNumericHours, formatPercentage, } from '../common/util/formatter';
 import {
-  distanceFromMeters,
-  distanceUnitString,
   speedFromKnots,
   speedUnitString,
 } from '../common/util/converter';
 import { useAttributePreference } from '../common/util/preferences';
 import fetchOrThrow from '../common/util/fetchOrThrow';
+import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
+import EvStationIcon from '@mui/icons-material/EvStation';
+import SpeedIcon from '@mui/icons-material/Speed';
+import NotesIcon from '@mui/icons-material/Notes';
+import BoltIcon from '@mui/icons-material/Bolt';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -67,6 +72,18 @@ const useStyles = makeStyles()((theme) => ({
       boxShadow: theme.shadows[3],
     },
   },
+  cardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: theme.spacing(1),
+    marginBottom: theme.spacing(1.5),
+    // Title takes the free space so every chip after it stays grouped on the right.
+    '& > :first-child': {
+      marginRight: 'auto',
+      marginBottom: 0,
+    },
+  },
   title: {
     fontWeight: 800,
     fontSize: '0.875rem',
@@ -82,7 +99,27 @@ const useStyles = makeStyles()((theme) => ({
     },
   },
   chartCard: {
-    height: 240,
+    height: 210,
+  },
+  deviceInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5),
+  },
+  deviceImage: {
+    height: 64,
+    width: 'auto',
+    objectFit: 'contain',
+  },
+  deviceName: {
+    fontWeight: 700,
+    lineHeight: 1.2,
+    whiteSpace: 'nowrap',
+  },
+  deviceModel: {
+    color: theme.palette.text.secondary,
+    lineHeight: 1.2,
+    whiteSpace: 'nowrap',
   },
   emptyState: {
     height: '100%',
@@ -100,6 +137,7 @@ const TimelinePage = () => {
   const t = useTranslation();
   const theme = useTheme();
   const desktop = useMediaQuery(theme.breakpoints.up('md'));
+  const showDeviceInfo = useMediaQuery(theme.breakpoints.up('sm'));
   const speedUnit = useAttributePreference('speedUnit');
   const distanceUnit = useAttributePreference('distanceUnit');
 
@@ -116,11 +154,10 @@ const TimelinePage = () => {
   const [spentSoc, setSpentSoc] = useState(0);
   const [maxSpeed, setMaxSpeed] = useState(0);
   const [avgSpeed, setAvgSpeed] = useState(0);
+  const [powerRange, setPowerRange] = useState({ min: 0, max: 0, count: 0 });
 
-  const deviceCate = useSelector((state) => {
-    const device = state.devices.items[id];
-    return device?.category || null;
-  });
+  const device = useSelector((state) => state.devices.items[id]);
+  const deviceCate = device?.category || null;
 
   const isEv = deviceCate?.substring(0, 2) === 'ev';
 
@@ -131,6 +168,9 @@ const TimelinePage = () => {
 
     setSelectedTrip(null);
     setLoading(true);
+    // The chart unmounts while loading and when a day has no data, so it cannot
+    // report a new range - clear it here or the previous day's values would stick.
+    setPowerRange({ min: 0, max: 0, count: 0 });
 
     const query = new URLSearchParams({
       deviceId: id,
@@ -186,7 +226,33 @@ const TimelinePage = () => {
 
   return (
     <div className={classes.root}>
-      <CalendarLine handleSubmit={handleSubmit} onBack={() => navigate(-1)} />
+      <CalendarLine
+        handleSubmit={handleSubmit}
+        onBack={() => navigate(-1)}
+        endAction={
+          showDeviceInfo && device && (
+            <Box className={classes.deviceInfo}>
+              {deviceCate && (
+                <Box
+                  component="img"
+                  src={`/images/${deviceCate}.png`}
+                  className={classes.deviceImage}
+                  draggable={false}
+                  alt=""
+                />
+              )}
+              <Box>
+                <Typography variant="h7" className={classes.deviceName}>
+                  {device.name}
+                </Typography>
+                <Typography variant="body2" className={classes.deviceModel}>
+                  {device.model}
+                </Typography>
+              </Box>
+            </Box>
+          )
+        }
+      />
 
       <div className={classes.content}>
         <Box className={classes.grid}>
@@ -215,14 +281,23 @@ const TimelinePage = () => {
               onSelectTrip={onSelectTrip}
               isEv={isEv}
               loading={loading}
+              totalDistance={distance}
             />
           </Box>
 
           <Box className={classes.chartRow}>
             <Paper elevation={0} className={classes.card}>
-              <Typography className={classes.title}>
-                {`${isEv ? t('alarmPowerOn') : t('reportEngineHours')} : ${loading ? t('sharedLoading') : formatNumericHours(engineHours, t)}`}
-              </Typography>
+              <Box className={classes.cardHeader}>
+                <Typography className={classes.title}>
+                  {isEv ? t('alarmPowerOn') : t('reportEngineHours')}
+                </Typography>
+                <Chip
+                  color="secondary"
+                  size="small"
+                  icon={<QueryBuilderIcon />}
+                  label={`${loading ? '---' : formatNumericHours(engineHours, t)}`}
+                />
+              </Box>
               <Box className={classes.chartCard}>
                 {renderContent(
                   routes.length,
@@ -240,9 +315,17 @@ const TimelinePage = () => {
             </Paper>
 
             <Paper elevation={0} className={classes.card}>
-              <Typography className={classes.title}>
-                {`${isEv ? t('reportSpentSoc') : t('reportSpentFuel')} : ${loading ? t('sharedLoading') : formatPercentage(isEv ? spentSoc : spentFuel)}`}
-              </Typography>
+              <Box className={classes.cardHeader}>
+                <Typography className={classes.title}>
+                  {isEv ? t('reportSpentSoc') : t('reportSpentFuel')}
+                </Typography>
+                <Chip
+                  color="secondary"
+                  size="small"
+                  icon={isEv ? <EvStationIcon /> : <LocalGasStationIcon />}
+                  label={`${loading ? '---' : formatPercentage(isEv ? spentSoc : spentFuel)}`}
+                />
+              </Box>
               <Box className={classes.chartCard}>
                 {renderContent(
                   routes.length,
@@ -258,9 +341,23 @@ const TimelinePage = () => {
             </Paper>
 
             <Paper elevation={0} className={classes.card}>
-              <Typography className={classes.title}>
-                {`${t('reportMaximumSpeed')} : ${speedFromKnots(maxSpeed, speedUnit).toFixed(0)} ${speedUnitString(speedUnit, t)}, ${t('sharedDistance')} : ${loading ? t('sharedLoading') : distanceFromMeters(distance, distanceUnit).toFixed(1)} ${distanceUnitString(distanceUnit, t)}`}
-              </Typography>
+              <Box className={classes.cardHeader}>
+                <Typography className={classes.title}>
+                  {`${t('positionSpeed')}`}
+                </Typography>
+                <Chip
+                  color="secondary"
+                  size="small"
+                  icon={<SpeedIcon />}
+                  label={`Max ${loading ? '---' : speedFromKnots(maxSpeed, speedUnit).toFixed(0)} ${speedUnitString(speedUnit, t)}`}
+                />
+                <Chip
+                  color="secondary"
+                  size="small"
+                  icon={<NotesIcon />}
+                  label={`Avg ${loading ? '---' : speedFromKnots(avgSpeed, speedUnit).toFixed(0)} ${speedUnitString(speedUnit, t)}`}
+                />
+              </Box>
               <Box className={classes.chartCard}>
                 {renderContent(
                   routes.length,
@@ -276,9 +373,17 @@ const TimelinePage = () => {
             </Paper>
 
             <Paper elevation={0} className={classes.card}>
-              <Typography className={classes.title}>
-                {`${t('positionPower')} (${isEv ? 'kW' : t('sharedVoltAbbreviation')})`}
-              </Typography>
+              <Box className={classes.cardHeader}>
+                <Typography className={classes.title}>
+                  {`${t('positionPower')} (${isEv ? 'kW' : t('sharedVoltAbbreviation')})`}
+                </Typography>
+                <Chip
+                  color="secondary"
+                  size="small"
+                  icon={<BoltIcon />}
+                  label={`Max ${loading || !powerRange.count ? '---' : powerRange.max.toFixed(1)} ${isEv ? 'kW' : t('sharedVoltAbbreviation')}`}
+                />
+              </Box>
               <Box className={classes.chartCard}>
                 {renderContent(
                   routes.length,
@@ -286,8 +391,9 @@ const TimelinePage = () => {
                     routesdata={routes}
                     attr={isEv ? 'remainingPower' : 'power'}
                     min={0}
-                    max={isEv ? 100 : 30}
+                    max={isEv ? 100 : 48}
                     syncId="timelinePage"
+                    onRangeChange={setPowerRange}
                   />,
                 )}
               </Box>

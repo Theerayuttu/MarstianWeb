@@ -27,7 +27,7 @@ const useStyles = makeStyles()((theme) => ({
   },
   heading: {
     fontWeight: 800,
-    color: theme.palette.primary.main,
+    color: theme.palette.primary.secondary,
   },
   timeline: {
     position: 'relative',
@@ -111,7 +111,7 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
-const TripLog = ({ trips, selectedTrip, onSelectTrip, isEv, loading }) => {
+const TripLog = ({ trips, selectedTrip, onSelectTrip, isEv, loading, totalDistance = 0 }) => {
   const { classes, cx } = useStyles();
   const t = useTranslation();
   const distanceUnit = useAttributePreference('distanceUnit');
@@ -121,8 +121,11 @@ const TripLog = ({ trips, selectedTrip, onSelectTrip, isEv, loading }) => {
 
   return (
     <Paper elevation={0} className={classes.root}>
-      <Typography variant="h6" className={classes.heading}>
+      <Typography variant="body1" className={classes.heading}>
         {t('reportTrips')}
+      </Typography>
+      <Typography variant="body2" color="secondary">
+        {`↗️ ${t('deviceTotalDistance')}: ${loading ? '---' : formatDistance(totalDistance, distanceUnit, t)}`}
       </Typography>
 
       {loading ? (
