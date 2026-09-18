@@ -175,6 +175,12 @@ const TripLog = ({ trips, selectedTrip, onSelectTrip, isEv, loading, totalDistan
                       {spent(trip) > 0 ? formatPercentage(spent(trip)) : '-'}
                     </strong>
                   </span>
+                  <span>
+                    {`${t('sharedDriver')}: `}
+                    <strong className={classes.statValue}>
+                      {trip.driverName || trip.driverUniqueId || '-'}
+                    </strong>
+                  </span>
                 </Box>
               </button>
             );
