@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Typography, IconButton, Toolbar, Paper, TextField } from '@mui/material';
+import { Typography, IconButton, Toolbar, Paper, TextField, MenuItem } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { default as Hls, Events } from 'hls.js/light';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import { useTranslation } from '../common/components/LocalizationProvider';
-import { useCatchCallback } from '../reactHelper';
 import BackIcon from '../common/components/BackIcon';
-import fetchOrThrow from '../common/util/fetchOrThrow';
+import usePersistedState from '../common/util/usePersistedState';
+import StreamPlayer from './StreamPlayer';
+
+const maxChannels = 9;
+const startInterval = 800;
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -17,21 +19,55 @@ const useStyles = makeStyles()((theme) => ({
     display: 'flex',
     flexDirection: 'column',
   },
-  video: {
-    flexGrow: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  player: {
-    maxWidth: '100%',
-    maxHeight: '100%',
+  toolbar: {
+    flexWrap: 'wrap',
+    rowGap: theme.spacing(1),
+    [theme.breakpoints.down('sm')]: {
+      paddingBlockEnd: theme.spacing(1),
+    },
   },
   title: {
-    flexGrow: 1,
+    flex: '1 1 0',
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
   },
-  channel: {
-    marginInline: theme.spacing(1),
+  controls: {
+    display: 'flex',
+    gap: theme.spacing(1),
+    marginInlineStart: theme.spacing(1),
+    // on narrow screens the controls drop to their own full-width row so the
+    // back button, device name and play button always stay visible
+    [theme.breakpoints.down('sm')]: {
+      order: 1,
+      flexBasis: '100%',
+      marginInlineStart: 0,
+    },
+  },
+  control: {
+    width: 120,
+    flexShrink: 0,
+    [theme.breakpoints.down('sm')]: {
+      width: 'auto',
+      flex: '1 1 0',
+      minWidth: 0,
+    },
+  },
+  grid: {
+    flexGrow: 1,
+    minHeight: 0,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(var(--stream-columns, 2), minmax(0, 1fr))',
+    gridAutoRows: '1fr',
+    gap: theme.spacing(1),
+    padding: theme.spacing(1),
+    background: theme.palette.common.black,
+    [theme.breakpoints.down('md')]: {
+      gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+      gridAutoRows: 'auto',
+      overflowY: 'auto',
+    },
   },
 }));
 
@@ -40,83 +76,115 @@ const StreamPage = () => {
   const navigate = useNavigate();
   const t = useTranslation();
 
-  const videoRef = useRef(null);
-
-  const [channel, setChannel] = useState(1);
-  const [activeChannel, setActiveChannel] = useState(null);
-  const [error, setError] = useState(false);
-
   const [searchParams] = useSearchParams();
   const deviceId = searchParams.get('deviceId');
   const device = useSelector((state) => state.devices.items[deviceId]);
 
-  const playing = activeChannel !== null;
+  const [mode, setMode] = usePersistedState('streamMode', 'single');
+  const [channel, setChannel] = usePersistedState('streamChannel', 1);
+  const [channelCount, setChannelCount] = usePersistedState('streamChannelCount', 4);
+  const [layout, setLayout] = usePersistedState('streamLayout', 2);
 
-  const sendCommand = useCatchCallback(
-    async (type, attributes) => {
-      await fetchOrThrow('/api/commands/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deviceId, type, attributes }),
-      });
-    },
-    [deviceId],
-  );
+  const [activeChannels, setActiveChannels] = useState(null);
+  const [maximized, setMaximized] = useState(null);
 
-  useEffect(() => {
-    if (activeChannel !== null) {
-      sendCommand('videoStart', { index: activeChannel });
-      const hls = new Hls();
-      hls.loadSource(`/api/stream/${deviceId}/${activeChannel}/live.m3u8`);
-      hls.attachMedia(videoRef.current);
-      hls.on(Events.MANIFEST_PARSED, () => videoRef.current.play());
-      hls.on(Events.ERROR, (_, data) => {
-        if (data.fatal) setError(true);
-      });
-      return () => {
-        hls.destroy();
-        sendCommand('videoStop', { index: activeChannel });
-      };
+  const playing = activeChannels !== null;
+  const multi = mode === 'multi';
+
+  const columns = playing ? Math.min(layout, activeChannels.length) : layout;
+
+  const handleToggle = () => {
+    if (playing) {
+      setActiveChannels(null);
+      setMaximized(null);
+    } else if (multi) {
+      setActiveChannels(Array.from({ length: channelCount }, (_, index) => index + 1));
+    } else {
+      setActiveChannels([channel]);
     }
-  }, [deviceId, activeChannel, sendCommand]);
+  };
+
+  const clamp = (value) => Math.min(Math.max(Number(value) || 1, 1), maxChannels);
 
   return (
     <div className={classes.root}>
       <Paper square>
-        <Toolbar>
+        <Toolbar className={classes.toolbar}>
           <IconButton edge="start" sx={{ mr: 2 }} onClick={() => navigate(-1)}>
             <BackIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
             {device?.name || t('linkLiveVideo')}
           </Typography>
-          <TextField
-            size="small"
-            type="number"
-            value={channel}
-            onChange={(event) => setChannel(Number(event.target.value) || 1)}
-            label={t('commandIndex')}
-            disabled={playing}
-            className={classes.channel}
-          />
+          <div className={classes.controls}>
+            <TextField
+              select
+              size="small"
+              value={mode}
+              onChange={(event) => setMode(event.target.value)}
+              label={t('streamMode')}
+              disabled={playing}
+              className={classes.control}
+            >
+              <MenuItem value="single">{t('streamModeSingle')}</MenuItem>
+              <MenuItem value="multi">{t('streamModeMulti')}</MenuItem>
+            </TextField>
+            <TextField
+              size="small"
+              type="number"
+              value={multi ? channelCount : channel}
+              onChange={(event) =>
+                multi
+                  ? setChannelCount(clamp(event.target.value))
+                  : setChannel(clamp(event.target.value))
+              }
+              label={multi ? t('streamChannelCount') : t('commandIndex')}
+              disabled={playing}
+              className={classes.control}
+            />
+            {multi && (
+              <TextField
+                select
+                size="small"
+                value={layout}
+                onChange={(event) => setLayout(Number(event.target.value))}
+                label={t('streamLayout')}
+                className={classes.control}
+              >
+                <MenuItem value={1}>1x1</MenuItem>
+                <MenuItem value={2}>2x2</MenuItem>
+                <MenuItem value={3}>3x3</MenuItem>
+              </TextField>
+            )}
+          </div>
           <IconButton
             edge="end"
+            sx={{ ml: 1 }}
             color={playing ? 'error' : 'primary'}
-            onClick={() => {
-              setError(false);
-              setActiveChannel(playing ? null : channel);
-            }}
+            onClick={handleToggle}
           >
             {playing ? <StopIcon /> : <PlayArrowIcon />}
           </IconButton>
         </Toolbar>
       </Paper>
-      <div className={classes.video}>
-        {error && <Typography>{t('errorConnection')}</Typography>}
-        {playing && !error && (
-          <video ref={videoRef} className={classes.player} autoPlay muted controls />
-        )}
-      </div>
+      {playing && (
+        <div
+          className={classes.grid}
+          style={{ '--stream-columns': maximized !== null ? 1 : columns }}
+        >
+          {activeChannels.map((item, index) => (
+            <StreamPlayer
+              key={`${deviceId}-${item}`}
+              deviceId={deviceId}
+              channel={item}
+              startDelay={index * startInterval}
+              hidden={maximized !== null && maximized !== item}
+              maximized={maximized === item}
+              onToggleMaximize={() => setMaximized((value) => (value === item ? null : item))}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
