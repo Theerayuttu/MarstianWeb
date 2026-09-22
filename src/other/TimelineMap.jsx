@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Slider, Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import MapView, { map } from '../map/core/MapView';
 import MapRoutePath from '../map/MapRoutePath';
 import MapRoutePoints from '../map/MapRoutePoints';

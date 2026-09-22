@@ -1,5 +1,5 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import { googleProtocol } from 'maplibre-google-maps';
 import { Protocol } from 'pmtiles';
 import { useRef, useLayoutEffect, useEffect, useState, useMemo } from 'react';
@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material';
 import MapSwitcher from '../control/MapSwitcher';
 import { useAttributePreference, usePreference } from '../../common/util/preferences';
 import usePersistedState from '../../common/util/usePersistedState';
-import { mapImages } from './preloadImages';
+import preloadImages, { mapImages } from './preloadImages';
 import useMapStyles from './useMapStyles';
 import { useAsyncTask } from '../../reactHelper';
 
@@ -43,13 +43,14 @@ const updateReadyValue = (value) => {
 
 const initMap = async () => {
   if (ready) return;
-  if (!map.hasImage('background')) {
-    Object.entries(mapImages).forEach(([key, value]) => {
+  await preloadImages();
+  Object.entries(mapImages).forEach(([key, value]) => {
+    if (!map.hasImage(key)) {
       map.addImage(key, value, {
         pixelRatio: window.devicePixelRatio,
       });
-    });
-  }
+    }
+  });
 };
 
 const MapView = ({ children }) => {
@@ -68,7 +69,6 @@ const MapView = ({ children }) => {
     'selectedMapStyle',
     usePreference('map', 'locationIqStreets'),
   );
-  const mapboxAccessToken = useAttributePreference('mapboxAccessToken');
   const maxZoom = useAttributePreference('web.maxZoom');
 
   const styles = useMemo(() => {
@@ -100,10 +100,6 @@ const MapView = ({ children }) => {
   }, [maxZoom]);
 
   useEffect(() => {
-    maplibregl.accessToken = mapboxAccessToken;
-  }, [mapboxAccessToken]);
-
-  useEffect(() => {
     const style = styles.find((s) => s.id === selectedStyleId);
     if (!style) {
       setSelectedStyleId(styles[0].id);
@@ -117,8 +113,7 @@ const MapView = ({ children }) => {
       if (!map.loaded()) {
         timeoutId = setTimeout(waiting, 33);
       } else {
-        initMap();
-        updateReadyValue(true);
+        initMap().then(() => updateReadyValue(true));
       }
     };
     map.once('styledata', waiting);

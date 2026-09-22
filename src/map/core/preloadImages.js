@@ -129,7 +129,7 @@ const theme = createTheme({
   },
 });
 
-export default async () => {
+const loadImages = async () => {
   const background = await loadImage(backgroundSvg);
   mapImages.background = await prepareIcon(background);
   mapImages.direction = await prepareIcon(await loadImage(directionSvg));
@@ -150,4 +150,13 @@ export default async () => {
       await Promise.all(results);
     }),
   );
+};
+
+let loading = null;
+
+export default () => {
+  if (!loading) {
+    loading = loadImages();
+  }
+  return loading;
 };
