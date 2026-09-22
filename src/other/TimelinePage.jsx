@@ -17,10 +17,11 @@ import CalendarLine from '../common/components/CalendarLine';
 import TimelineMap from './TimelineMap';
 import TripLog from './TripLog';
 import LineChartAttributes from '../common/components/LineChartAttributes';
-import { formatNumericHours, formatPercentage, } from '../common/util/formatter';
+import { formatNumericHours, formatPercentage, formatVolume, } from '../common/util/formatter';
 import {
   speedFromKnots,
   speedUnitString,
+  volumeUnitString,
 } from '../common/util/converter';
 import { useAttributePreference } from '../common/util/preferences';
 import fetchOrThrow from '../common/util/fetchOrThrow';
@@ -139,7 +140,8 @@ const TimelinePage = () => {
   const desktop = useMediaQuery(theme.breakpoints.up('md'));
   const showDeviceInfo = useMediaQuery(theme.breakpoints.up('sm'));
   const speedUnit = useAttributePreference('speedUnit');
-  const distanceUnit = useAttributePreference('distanceUnit');
+  //const distanceUnit = useAttributePreference('distanceUnit');
+  const volumeUnit = useAttributePreference('volumeUnit');
 
   const [from, setFrom] = useState(() => dayjs().startOf('day').toISOString());
   const [to, setTo] = useState(() => dayjs().endOf('day').toISOString());
@@ -158,6 +160,8 @@ const TimelinePage = () => {
 
   const device = useSelector((state) => state.devices.items[id]);
   const deviceCate = device?.category || null;
+  const fuelVolume = device?.attributes?.fuelVolume || false;
+  const fuelFullTank = device?.attributes?.fuelFullTank || 100;
 
   const isEv = deviceCate?.substring(0, 2) === 'ev';
 
@@ -317,13 +321,13 @@ const TimelinePage = () => {
             <Paper elevation={0} className={classes.card}>
               <Box className={classes.cardHeader}>
                 <Typography className={classes.title}>
-                  {isEv ? t('reportSpentSoc') : t('reportSpentFuel')}
+                  {`${isEv ? t('reportSpentSoc') : t('reportSpentFuel')} (${fuelVolume ? volumeUnitString(volumeUnit, t) : '%'})`}
                 </Typography>
                 <Chip
                   color="secondary"
                   size="small"
                   icon={isEv ? <EvStationIcon /> : <LocalGasStationIcon />}
-                  label={`${loading ? '---' : formatPercentage(isEv ? spentSoc : spentFuel)}`}
+                  label={`${loading ? '---' : fuelVolume ? formatVolume(spentFuel, volumeUnit, t) : formatPercentage(isEv ? spentSoc : spentFuel)}`}
                 />
               </Box>
               <Box className={classes.chartCard}>
@@ -333,7 +337,7 @@ const TimelinePage = () => {
                     routesdata={routes}
                     attr={isEv ? 'soc' : 'fuel'}
                     min={0}
-                    max={100}
+                    max={fuelFullTank}
                     syncId="timelinePage"
                   />,
                 )}

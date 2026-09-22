@@ -79,6 +79,8 @@ const PositionValue = ({ position, property, attribute }) => {
       case 'motorPower':
       case 'batteryPower':
         return formatPower(value);
+      case 'fuel':
+        return device?.attributes?.fuelVolume ? formatVolume(value, volumeUnit, t) : formatPercentage(value);
       default:
         switch (positionAttributes[key]?.dataType) {
           case 'speed':

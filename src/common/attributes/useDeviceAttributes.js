@@ -32,6 +32,14 @@ export default (t) =>
         name: t('attributeForwardUrl'),
         type: 'string',
       },
+      'fuelVolume': {
+        name: 'Fuel Unit Volume',
+        type: 'boolean',
+      },
+      'fuelFullTank': {
+        name: 'Fuel Full Tank',
+        type: 'number',
+      },
     }),
     [t],
   );

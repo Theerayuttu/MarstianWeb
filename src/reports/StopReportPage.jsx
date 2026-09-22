@@ -10,6 +10,7 @@ import {
   formatTime,
   formatNumericHours,
   formatPercentage,
+  formatVolume,
 } from '../common/util/formatter';
 import ReportFilter from './components/ReportFilter';
 import { useAttributePreference, usePreference } from '../common/util/preferences';
@@ -56,7 +57,7 @@ const StopReportPage = () => {
   const server = useSelector((state) => state.session.server);
 
   const distanceUnit = useAttributePreference('distanceUnit');
-  //const volumeUnit = useAttributePreference('volumeUnit');
+  const volumeUnit = useAttributePreference('volumeUnit');
   const coordinateFormat = usePreference('coordinateFormat');
 
   const [columns, setColumns] = usePersistedState('stopColumns', [
@@ -136,6 +137,7 @@ const StopReportPage = () => {
       case 'engineHours':
         return value > 0 ? formatNumericHours(value, t, 'h:m') : 0;
       case 'spentFuel':
+        return devices[item.deviceId]?.attributes?.fuelVolume ? formatVolume(value, volumeUnit, t) : formatPercentage(value);
       case 'spentSoc':
         return value > 0 ? formatPercentage(value) : 0;
       case 'address':
