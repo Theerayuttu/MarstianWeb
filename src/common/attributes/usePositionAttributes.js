@@ -401,10 +401,6 @@ export default (t) =>
         type: 'number',
         dataType: 'percentage',
       },
-      charge: {
-        name: 'Charging',
-        type: 'string',
-      },
       poweron: {
         name: t('alarmPowerOn'),
         type: 'boolean',

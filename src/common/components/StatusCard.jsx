@@ -181,7 +181,7 @@ const StatusCell = ({ name, content, iconKey }) => {
         {name}
       </Typography>
       <Typography variant="body2" color="textSecondary" className={classes.statusText}>
-        { ['poweron', 'poweroff'].includes(attributeKey) ? '' : content}
+        {['poweron', 'poweroff'].includes(attributeKey) ? '' : content}
       </Typography>
     </Box>
   );
@@ -202,7 +202,10 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
   const defaultItems = useSelector((state) => state.session.server.attributes.positionItems);
 
   const positionAttributes = usePositionAttributes(t);
-  const positionItems = useAttributePreference('positionItems', defaultItems || 'speed,address,totalDistance,course');
+  const positionItems = useAttributePreference(
+    'positionItems',
+    defaultItems || 'speed,address,totalDistance,course',
+  );
 
   const navigationAppLink = useAttributePreference('navigationAppLink');
   const navigationAppTitle = useAttributePreference('navigationAppTitle');
@@ -249,14 +252,14 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
     }
   };
 
-  const statusColor = 
-  device.status === 'offline' || position?.attributes?.output === 1
-    ? 'error'
-    : device.status === 'unknown'
-      ? 'default'
-      : position?.attributes?.ignition
-        ? 'success'
-        : 'info';
+  const statusColor =
+    device.status === 'offline' || position?.attributes?.output === 1
+      ? 'error'
+      : device.status === 'unknown'
+        ? 'default'
+        : position?.attributes?.ignition
+          ? 'success'
+          : 'info';
 
   return (
     <>
@@ -307,7 +310,8 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
               {position && (
                 <CardContent className={classes.content}>
                   <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                    <Chip variant="outlined"
+                    <Chip
+                      variant="outlined"
                       icon={position.attributes.output === 1 ? <BlockIcon /> : undefined}
                       label={
                         position.attributes.output === 1
@@ -320,14 +324,22 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                       }
                       sx={{
                         fontWeight: 'bold',
-                        bgcolor: 
-                          statusColor === 'error' ? 'rgba(211, 47, 47, 0.15)' :
-                          statusColor === 'success' ? 'rgba(46, 125, 50, 0.15)' :
-                          statusColor === 'info' ? 'rgba(21, 101, 192, 0.2)' : 'rgba(255, 255, 255, 0.08)',
-                        color: 
-                          statusColor === 'error' ? '#ed1b08' :
-                          statusColor === 'success' ? '#81c784' :
-                          statusColor === 'info' ? '#64b5f6' : '#9e9e9e',
+                        bgcolor:
+                          statusColor === 'error'
+                            ? 'rgba(211, 47, 47, 0.15)'
+                            : statusColor === 'success'
+                              ? 'rgba(46, 125, 50, 0.15)'
+                              : statusColor === 'info'
+                                ? 'rgba(21, 101, 192, 0.2)'
+                                : 'rgba(255, 255, 255, 0.08)',
+                        color:
+                          statusColor === 'error'
+                            ? '#ed1b08'
+                            : statusColor === 'success'
+                              ? '#81c784'
+                              : statusColor === 'info'
+                                ? '#64b5f6'
+                                : '#9e9e9e',
                         border: '1px solid',
                       }}
                     />
@@ -339,13 +351,14 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                       sx={{ border: 'unset' }}
                     />
                     {position.protocol === 'jt808' && (
-                    <Chip
-                      icon={<VideocamIcon />}
-                      label={t('linkLiveVideo')}
-                      variant="outlined"
-                      onClick={() => navigate(`/stream?deviceId=${deviceId}`)}
-                      sx={{ border: 'unset' }}
-                    />)}
+                      <Chip
+                        icon={<VideocamIcon />}
+                        label={t('linkLiveVideo')}
+                        variant="outlined"
+                        onClick={() => navigate(`/stream?deviceId=${deviceId}`)}
+                        sx={{ border: 'unset' }}
+                      />
+                    )}
                   </Stack>
                   <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                     <Chip
@@ -387,9 +400,12 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                                 .split(',')
                                 .filter(
                                   (key) =>
-                                    ( position.hasOwnProperty(key) ||
-                                      position.attributes.hasOwnProperty(key) ) &&
-                                    !(device.category?.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
+                                    (position.hasOwnProperty(key) ||
+                                      position.attributes.hasOwnProperty(key)) &&
+                                    !(
+                                      device.category?.slice(0, 2) === 'ev' &&
+                                      ['ignition', 'fuel'].includes(key)
+                                    ),
                                 )
                                 .slice(0, 5)
                                 .map((key) => (
@@ -416,9 +432,12 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
                           .split(',')
                           .filter(
                             (key) =>
-                              ( position.hasOwnProperty(key) ||
-                                position.attributes.hasOwnProperty(key) ) &&
-                              !(device.category?.slice(0, 2) === 'ev' && ['ignition', 'fuel'].includes(key))
+                              (position.hasOwnProperty(key) ||
+                                position.attributes.hasOwnProperty(key)) &&
+                              !(
+                                device.category?.slice(0, 2) === 'ev' &&
+                                ['ignition', 'fuel'].includes(key)
+                              ),
                           )
                           .map((key) => (
                             <StatusRow

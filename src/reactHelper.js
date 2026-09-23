@@ -47,7 +47,7 @@ export const useEffectAsync = (effect, deps) => {
     return () => {
       cleanup?.();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line @eslint-react/exhaustive-deps -- deps is a parameter of this hook
   }, deps);
 };
 

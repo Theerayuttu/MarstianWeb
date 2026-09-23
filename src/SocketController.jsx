@@ -80,7 +80,7 @@ const SocketController = () => {
 
   const includeLogsRef = useRef(includeLogs);
   includeLogsRef.current = includeLogs;
-  
+
   const connectSocketRef = useRef();
 
   const connectSocket = useCallback(() => {
