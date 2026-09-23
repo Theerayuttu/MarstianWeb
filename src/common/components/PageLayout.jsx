@@ -184,12 +184,7 @@ const PageLayout = ({ menu, breadcrumbs, children }) => {
         <Toolbar className={classes.drawerToolbar} disableGutters>
           {!miniVariant && (
             <>
-              <IconButton
-                edge="start"
-                color="inherit"
-                sx={{ mr: 1 }}
-                onClick={() => navigate('/')}
-              >
+              <IconButton edge="start" color="inherit" sx={{ mr: 1 }} onClick={() => navigate('/')}>
                 <BackIcon />
               </IconButton>
               <PageTitle breadcrumbs={breadcrumbs} />

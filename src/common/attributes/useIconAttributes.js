@@ -26,12 +26,12 @@ export const mapIconAttributes = {
   fuelConsumption: fuelConsumptionIcon,
   coolantTemp: coolantTempIcon,
   driverUniqueId: driverIdIcon,
-  soc:evbatteryIcon,
-  charge:chargingIcon,
-  poweron:poweronIcon,
-  poweroff:poweroffIcon,
-  LV:PowerIcon,
-  HV:hvIcon,
+  soc: evbatteryIcon,
+  charge: chargingIcon,
+  poweron: poweronIcon,
+  poweroff: poweroffIcon,
+  LV: PowerIcon,
+  HV: hvIcon,
   default: defaultIcon,
 };
 

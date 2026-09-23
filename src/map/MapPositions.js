@@ -77,6 +77,7 @@ const MapPositions = ({
         direction: showDirection,
       };
     },
+    // eslint-disable-next-line @eslint-react/exhaustive-deps -- iconColor only closes over showStatus, already listed
     [directionType, showStatus],
   );
 

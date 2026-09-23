@@ -47,9 +47,11 @@ const CommandDevicePage = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(command),
     });
-    
+
     if (response.ok) {
-      setStatusText(`${response.status} ${response.statusText} ${command.type} ${ response.status === 202 ? t('commandQueued') : t('commandSent') }`);
+      setStatusText(
+        `${response.status} ${response.statusText} ${command.type} ${response.status === 202 ? t('commandQueued') : t('commandSent')}`,
+      );
       setOpenSnackbar(true);
     } else {
       throw Error(await response.text());
@@ -91,9 +93,9 @@ const CommandDevicePage = () => {
           </Button>
           <Snackbar
             open={openSnackbar}
-            autoHideDuration={8000} 
+            autoHideDuration={8000}
             onClose={() => navigate(-1)}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           >
             <Alert onClose={() => navigate(-1)} severity="info">
               {statusText}

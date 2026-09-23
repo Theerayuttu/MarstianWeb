@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import {
-  Box,
-  Paper,
-  Typography,
-  useMediaQuery,
-  Chip,
-} from '@mui/material';
+import { Box, Paper, Typography, useMediaQuery, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { makeStyles } from 'tss-react/mui';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -17,12 +11,8 @@ import CalendarLine from '../common/components/CalendarLine';
 import TimelineMap from './TimelineMap';
 import TripLog from './TripLog';
 import LineChartAttributes from '../common/components/LineChartAttributes';
-import { formatNumericHours, formatPercentage, formatVolume, } from '../common/util/formatter';
-import {
-  speedFromKnots,
-  speedUnitString,
-  volumeUnitString,
-} from '../common/util/converter';
+import { formatNumericHours, formatPercentage, formatVolume } from '../common/util/formatter';
+import { speedFromKnots, speedUnitString, volumeUnitString } from '../common/util/converter';
 import { useAttributePreference } from '../common/util/preferences';
 import fetchOrThrow from '../common/util/fetchOrThrow';
 import QueryBuilderIcon from '@mui/icons-material/QueryBuilder';
@@ -234,7 +224,8 @@ const TimelinePage = () => {
         handleSubmit={handleSubmit}
         onBack={() => navigate(-1)}
         endAction={
-          showDeviceInfo && device && (
+          showDeviceInfo &&
+          device && (
             <Box className={classes.deviceInfo}>
               {deviceCate && (
                 <Box
@@ -260,10 +251,7 @@ const TimelinePage = () => {
 
       <div className={classes.content}>
         <Box className={classes.grid}>
-          <Box
-            className={classes.mapCard}
-            sx={{ gridColumn: desktop ? 'span 8' : '1 / -1' }}
-          >
+          <Box className={classes.mapCard} sx={{ gridColumn: desktop ? 'span 8' : '1 / -1' }}>
             {!loading && routes.length ? (
               <TimelineMap datapositions={routes} deviceId={id} selectedTrip={selectedTrip} />
             ) : (
@@ -275,10 +263,7 @@ const TimelinePage = () => {
             )}
           </Box>
 
-          <Box
-            className={classes.mapCard}
-            sx={{ gridColumn: desktop ? 'span 4' : '1 / -1' }}
-          >
+          <Box className={classes.mapCard} sx={{ gridColumn: desktop ? 'span 4' : '1 / -1' }}>
             <TripLog
               trips={trips}
               selectedTrip={selectedTrip}
@@ -346,9 +331,7 @@ const TimelinePage = () => {
 
             <Paper elevation={0} className={classes.card}>
               <Box className={classes.cardHeader}>
-                <Typography className={classes.title}>
-                  {`${t('positionSpeed')}`}
-                </Typography>
+                <Typography className={classes.title}>{`${t('positionSpeed')}`}</Typography>
                 <Chip
                   color="secondary"
                   size="small"

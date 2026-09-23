@@ -63,9 +63,15 @@ const RegisterPage = () => {
     await fetchOrThrow('/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, totpKey, attributes: {
-                              keycode: keyCodeRegis, 
-                            }, }),
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        totpKey,
+        attributes: {
+          keycode: keyCodeRegis,
+        },
+      }),
     });
     setSnackbarOpen(true);
   });

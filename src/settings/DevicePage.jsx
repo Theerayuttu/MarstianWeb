@@ -20,10 +20,8 @@ import useDeviceAttributes from '../common/attributes/useDeviceAttributes';
 import { useManager } from '../common/util/permissions';
 import SettingsMenu from './components/SettingsMenu';
 import useCommonDeviceAttributes from '../common/attributes/useCommonDeviceAttributes';
-import { useCatch } from '../reactHelper';
 import useSettingsStyles from './common/useSettingsStyles';
 import QrCodeDialog from '../common/components/QrCodeDialog';
-import fetchOrThrow from '../common/util/fetchOrThrow';
 
 const DevicePage = () => {
   const { classes } = useSettingsStyles();

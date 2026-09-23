@@ -36,9 +36,7 @@ const useStyles = makeStyles()((theme) => ({
     padding: theme.spacing(0.75, 2),
     borderRadius: theme.spacing(1.5),
     background:
-      theme.palette.mode === 'dark'
-        ? 'rgba(30, 30, 30, 0.7)'
-        : 'rgba(255, 255, 255, 0.8)',
+      theme.palette.mode === 'dark' ? 'rgba(30, 30, 30, 0.7)' : 'rgba(255, 255, 255, 0.8)',
     backdropFilter: 'blur(10px)',
     boxShadow: theme.shadows[2],
   },
@@ -87,9 +85,9 @@ const TimelineMap = ({ datapositions, deviceId, selectedTrip }) => {
   useEffect(() => {
     const coords = selectedTrip
       ? [
-        [selectedTrip.startLon, selectedTrip.startLat],
-        [selectedTrip.endLon, selectedTrip.endLat],
-      ]
+          [selectedTrip.startLon, selectedTrip.startLat],
+          [selectedTrip.endLon, selectedTrip.endLat],
+        ]
       : positions.map((item) => [item.longitude, item.latitude]);
 
     if (coords.length) {

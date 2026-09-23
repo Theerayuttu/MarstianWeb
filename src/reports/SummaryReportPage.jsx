@@ -49,7 +49,7 @@ const columnsArray = [
   ['startHours', 'reportStartEngineHours'],
   ['endHours', 'reportEndEngineHours'],
   ['spentFuel', 'reportSpentFuel'],
-  ['spentSoc','reportSpentSoc'],
+  ['spentSoc', 'reportSpentSoc'],
   ['startAddress', 'reportStartAddress'],
   ['endAddress', 'reportEndAddress'],
 ];
@@ -167,7 +167,9 @@ const SummaryReportPage = () => {
       case 'endHours':
         return value > 0 ? formatNumericHours(value, t, 'h:m') : 0;
       case 'spentFuel':
-        return devices[item.deviceId]?.attributes?.fuelVolume ? formatVolume(value, volumeUnit, t) : formatPercentage(value);
+        return devices[item.deviceId]?.attributes?.fuelVolume
+          ? formatVolume(value, volumeUnit, t)
+          : formatPercentage(value);
       case 'spentSoc':
         return formatPercentage(value);
       case 'startAddress':

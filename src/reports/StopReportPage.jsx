@@ -43,7 +43,7 @@ const columnsArray = [
   ['duration', 'reportDuration'],
   ['engineHours', 'reportEngineHours'],
   ['spentFuel', 'reportSpentFuel'],
-  ['spentSoc','reportSpentSoc'],
+  ['spentSoc', 'reportSpentSoc'],
 ];
 const columnsMap = new Map(columnsArray);
 
@@ -137,7 +137,9 @@ const StopReportPage = () => {
       case 'engineHours':
         return value > 0 ? formatNumericHours(value, t, 'h:m') : 0;
       case 'spentFuel':
-        return devices[item.deviceId]?.attributes?.fuelVolume ? formatVolume(value, volumeUnit, t) : formatPercentage(value);
+        return devices[item.deviceId]?.attributes?.fuelVolume
+          ? formatVolume(value, volumeUnit, t)
+          : formatPercentage(value);
       case 'spentSoc':
         return value > 0 ? formatPercentage(value) : 0;
       case 'address':

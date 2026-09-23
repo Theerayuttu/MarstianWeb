@@ -121,12 +121,7 @@ const UserConnectionsPage = () => {
           </AccordionDetails>
         </Accordion>
         <div className={classes.buttons}>
-          <Button
-            type="button"
-            color="primary"
-            variant="outlined"
-            onClick={() => navigate(-1)}
-          >
+          <Button type="button" color="primary" variant="outlined" onClick={() => navigate(-1)}>
             {t('sharedAccept')}
           </Button>
         </div>
