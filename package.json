@@ -1,6 +1,6 @@
 {
   "name": "marstian",
-  "version": "6.14.8",
+  "version": "6.15.4",
   "type": "module",
   "private": true,
   "dependencies": {
@@ -21,7 +21,7 @@
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "hls.js": "^1.7.2",
-    "maplibre-gl": "~5.24.0",
+    "maplibre-gl": "^6.10.0",
     "maplibre-google-maps": "^1.1.0",
     "mui-file-input": "^9.0.0",
     "pmtiles": "^4.4.1",

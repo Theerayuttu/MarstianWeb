@@ -6,12 +6,6 @@ updates:
       interval: "daily"
     ignore:
       - dependency-name: "mapbox-gl"
-      # v6 is ESM-only and its GeoJSON sources render nothing in this app.
-      # Unpin only alongside a deliberate v6 migration.
-      - dependency-name: "maplibre-gl"
-        update-types:
-          - "version-update:semver-major"
-          - "version-update:semver-minor"
       # TypeScript 7 breaks ts-api-utils, which @eslint-react pulls in,
       # crashing `npm run lint` outright.
       - dependency-name: "typescript"
