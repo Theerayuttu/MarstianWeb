@@ -3,7 +3,25 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    # The default of 5 was already exceeded, which stops Dependabot
+    # proposing anything further until the backlog is cleared.
+    open-pull-requests-limit: 10
+    # Minor and patch updates ride together, one PR per group. Majors are
+    # deliberately left out so each one still arrives on its own and gets
+    # read properly - a maplibre-gl v5 to v6 bump reached main unnoticed
+    # and took the map with it.
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
     ignore:
       - dependency-name: "mapbox-gl"
       # TypeScript 7 breaks ts-api-utils, which @eslint-react pulls in,
