@@ -401,6 +401,9 @@ const MainPage = () => {
   const location = useLocation();
   const t = useTranslation();
 
+  const appName = useSelector((state) => state.session.server.attributes.appName);
+  const serverDescription = useSelector((state) => state.session.server.attributes.description);
+
   const desktop = useMediaQuery(theme.breakpoints.up('md'));
 
   const mapOnSelect = useAttributePreference('mapOnSelect', true);
@@ -754,14 +757,14 @@ const MainPage = () => {
         <aside className={cx(classes.sidebar, { [classes.sidebarCollapsed]: sidebarCollapsed })}>
           <div className={classes.brand}>
             <Avatar className={classes.brandAvatar}>
-              <img src="/marstianicon.png" alt="MARSTIAN" width="30%" />
+              <img src="/logoAppIcon.png" alt={appName} width="30%" />
             </Avatar>
             {!sidebarCollapsed && (
               <div>
                 <Typography variant="h6" fontWeight={800} letterSpacing={0.5}>
-                  Marstian
+                  {appName}
                 </Typography>
-                <Typography variant="caption">Fleet Management Pro</Typography>
+                <Typography variant="caption">{serverDescription}</Typography>
               </div>
             )}
           </div>

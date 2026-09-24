@@ -57,6 +57,7 @@ const useStyles = makeStyles()((theme) => ({
     fontWeight: 700,
     letterSpacing: 2,
     fontSize: '1rem',
+    textTransform: 'uppercase',
   },
   headerActions: {
     display: 'flex',
@@ -147,6 +148,7 @@ const useStyles = makeStyles()((theme) => ({
     boxShadow: theme.layout.loginButtonShadow,
   },
   secondaryLink: {
+    cursor: 'pointer',
     fontWeight: 600,
   },
   flag: {
@@ -174,6 +176,9 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showServerTooltip, setShowServerTooltip] = useState(false);
   const [showQr, setShowQr] = useState(false);
+
+  const companyName = useSelector((state) => state.session.server.attributes.companyName);
+  const appName = useSelector((state) => state.session.server.attributes.appName);
 
   const registrationEnabled = useSelector((state) => state.session.server.registration);
   const languageEnabled = useSelector((state) => {
@@ -253,7 +258,7 @@ const LoginPage = () => {
     <div className={classes.root}>
       <header className={classes.header}>
         <Typography className={classes.brand} component="h1">
-          MARSTIAN
+          {appName}
         </Typography>
         <div className={classes.headerActions}>
           {languageEnabled && (
@@ -294,11 +299,11 @@ const LoginPage = () => {
       <main className={classes.main}>
         <div className={classes.card}>
           <div className={classes.avatar}>
-            <img src="/marstianicon.png" alt="MARSTIAN" width="30%" />
+            <img src="/logoAppIcon.png" alt={appName} width="30%" />
           </div>
           <Stack spacing={0.5} textAlign="center">
             <Typography variant="body2" color="text.secondary">
-              Secure access to MARSTIAN Application
+              Secure access to {appName} Application
             </Typography>
           </Stack>
 
@@ -306,12 +311,12 @@ const LoginPage = () => {
             <Stack spacing={2.5} mt={1}>
               <div className={classes.formControl}>
                 <Typography className={classes.inputLabel}>
-                  {t('userEmail').toUpperCase()}
+                  {t('userEmail').toUpperCase()} 
                 </Typography>
                 <TextField
                   required
                   error={failed}
-                  placeholder="example@marstianapp.com"
+                  placeholder={``}
                   name="email"
                   value={email}
                   autoComplete="email"
@@ -386,7 +391,7 @@ const LoginPage = () => {
                 className={classes.primaryButton}
                 disabled={!email || !password || (codeEnabled && !code)}
               >
-                SIGN IN TO MARSTIAN
+                SIGN IN TO {appName}
               </Button>
               <Typography className={classes.infoText}>
                 Authorized Personnel Only.{' '}
@@ -413,7 +418,7 @@ const LoginPage = () => {
 
       <footer className={classes.footer}>
         <Typography variant="body2">
-          © 2024 MarsX Things. All rights reserved. V{versionApp}
+          {companyName} © {new Date().getFullYear()}. All rights reserved. V{versionApp}
         </Typography>
       </footer>
 
