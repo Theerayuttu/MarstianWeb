@@ -311,7 +311,7 @@ const LoginPage = () => {
             <Stack spacing={2.5} mt={1}>
               <div className={classes.formControl}>
                 <Typography className={classes.inputLabel}>
-                  {t('userEmail').toUpperCase()} 
+                  {t('userEmail').toUpperCase()}
                 </Typography>
                 <TextField
                   required
@@ -418,7 +418,7 @@ const LoginPage = () => {
 
       <footer className={classes.footer}>
         <Typography variant="body2">
-          {companyName} © {new Date().getFullYear()}. All rights reserved. V{versionApp}
+          {companyName} All rights reserved. V{versionApp}
         </Typography>
       </footer>
 
