@@ -14,6 +14,13 @@ import {
   nativePostMessage,
 } from './common/components/NativeInterface';
 import fetchOrThrow from './common/util/fetchOrThrow';
+// TEMPORARY DIAGNOSTIC - remove once the WebView socket issue is resolved
+import {
+  socketDiag,
+  socketDiagAttach,
+  socketDiagEnvironment,
+  SocketDiagOverlay,
+} from './common/util/socketDiag';
 
 const logoutCode = 4000;
 
@@ -89,7 +96,10 @@ const SocketController = () => {
       socketRef.current.close();
     }
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const socket = new WebSocket(`${protocol}//${window.location.host}/api/socket`);
+    const url = `${protocol}//${window.location.host}/api/socket`;
+    const socket = new WebSocket(url);
+    // TEMPORARY DIAGNOSTIC
+    socketDiagAttach(socket, url);
     socketRef.current = socket;
 
     socket.onopen = () => {
@@ -102,6 +112,8 @@ const SocketController = () => {
       if (event.code === logoutCode) return;
       try {
         const devicesResponse = await fetch('/api/devices');
+        // TEMPORARY DIAGNOSTIC
+        socketDiag('REST /api/devices', devicesResponse.status);
         if (socketRef.current !== socket) return;
         if (devicesResponse.ok) {
           dispatch(devicesActions.update(await devicesResponse.json()));
@@ -119,6 +131,8 @@ const SocketController = () => {
       }
       if (socketRef.current !== socket) return;
       clearReconnectTimeout();
+      // TEMPORARY DIAGNOSTIC
+      socketDiag('RETRY in', '60s');
       reconnectTimeoutRef.current = setTimeout(() => {
         reconnectTimeoutRef.current = null;
         connectSocketRef.current?.();
@@ -127,6 +141,8 @@ const SocketController = () => {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      // TEMPORARY DIAGNOSTIC
+      socketDiag('MSG', Object.keys(data).join(','));
       if (data.devices) {
         dispatch(devicesActions.update(data.devices));
       }
@@ -143,6 +159,11 @@ const SocketController = () => {
   }, [clearReconnectTimeout, dispatch, navigate]);
 
   connectSocketRef.current = connectSocket;
+
+  // TEMPORARY DIAGNOSTIC
+  useEffect(() => {
+    socketDiagEnvironment();
+  }, []);
 
   useEffect(() => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -219,6 +240,8 @@ const SocketController = () => {
 
   return (
     <>
+      {/* TEMPORARY DIAGNOSTIC */}
+      <SocketDiagOverlay />
       {notifications.map((notification) => (
         <Snackbar
           key={notification.id}
