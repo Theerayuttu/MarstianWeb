@@ -76,6 +76,8 @@ const PositionValue = ({ position, property, attribute }) => {
         return formatPowerConsumption(value, 0);
       case 'remainingPower':
         return formatPower(value, 0);
+      case 'remainingRange':
+        return formatDistance(value * 1000, distanceUnit, t);
       case 'motorPower':
       case 'batteryPower':
         return formatPower(value);
