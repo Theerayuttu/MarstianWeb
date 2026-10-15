@@ -376,9 +376,9 @@ const TimelinePage = () => {
                   routes.length,
                   <LineChartAttributes
                     routesdata={routes}
-                    attr={isEv ? 'remainingPower' : 'power'}
+                    attr={isEv ? 'batteryPower' : 'power'}
                     min={0}
-                    max={isEv ? 100 : 48}
+                    max={48}
                     syncId="timelinePage"
                     onRangeChange={setPowerRange}
                   />,
