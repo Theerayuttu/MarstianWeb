@@ -419,6 +419,12 @@ export default (t) =>
         type: 'number',
         dataType: 'voltage',
       },
+      batteryTemp: {
+        name: 'Batt Temp',
+      },
+      batteryPower: {
+        name: 'Batt Power',
+      },
     }),
     [t],
   );
