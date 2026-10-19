@@ -14,6 +14,7 @@ import chargingIcon from '../../resources/images/data/evcharging.svg';
 import poweronIcon from '../../resources/images/data/poweron.svg';
 import poweroffIcon from '../../resources/images/data/poweroff.svg';
 import hvIcon from '../../resources/images/data/hv.svg';
+import batteryPowerIcon from '../../resources/images/data/batteryPower.svg';
 
 export const mapIconAttributes = {
   fuel: fuelIcon,
@@ -32,6 +33,8 @@ export const mapIconAttributes = {
   poweroff: poweroffIcon,
   LV: PowerIcon,
   HV: hvIcon,
+  batteryTemp: coolantTempIcon,
+  batteryPower: batteryPowerIcon,
   default: defaultIcon,
 };
 
