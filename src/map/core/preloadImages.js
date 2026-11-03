@@ -53,6 +53,7 @@ import evtruckSvg from '../../resources/images/icon/evtruck.svg';
 import garbagetruckSvg from '../../resources/images/icon/garbagetruck.svg';
 import evcarSvg from '../../resources/images/icon/evcar.svg';
 import evbusSvg from '../../resources/images/icon/evbus.svg';
+import tanktruckSvg from '../../resources/images/icon/tanktruck.svg';
 
 export const mapIcons = {
   animal: animalSvg,
@@ -103,6 +104,7 @@ export const mapIcons = {
   garbagetruck: garbagetruckSvg,
   evbus: evbusSvg,
   evcar: evcarSvg,
+  tanktruck: tanktruckSvg,
 };
 
 export const mapIconKey = (category) => {

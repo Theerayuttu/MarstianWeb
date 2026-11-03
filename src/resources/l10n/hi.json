@@ -694,6 +694,7 @@
     "categoryEvsuv":"EV SUV",
     "categoryEvbus":"EV Bus",
     "categoryEvgarbage":"EV Garbage",
+    "categoryTanktruck":"Tank Truck",
     "welcomeLoginPage": "Welcome to",
     "deviceBlockUsageMenu":"Block Engine Start",
     "commandBlock":"Block",

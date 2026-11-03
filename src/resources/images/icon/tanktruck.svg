@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64" fill="none" aria-label="Fuel tanker truck icon">
+  <g fill="currentColor">
+    <path d="M4 22c0-3.3 2.7-6 6-6h26c3.3 0 6 2.7 6 6v19H4V22Zm6-2a2 2 0 0 0-2 2v15h30V22a2 2 0 0 0-2-2H10Z"/>
+    <path d="M15 12h4v5h-4zm13 0h4v5h-4zM3 40h41v5H3z"/>
+    <path d="M44 27h9c1.2 0 2.4.7 3 1.7l7 11.5c.7 1.1 1 2.3 1 3.6v9c0 1.8-1.4 3.2-3.2 3.2h-3.2a8 8 0 0 0-15.6 0H28a8 8 0 0 0-15.6 0H4a4 4 0 0 1-4-4v-5h44V27Zm4 4v12h11l-6.4-10.8a2.5 2.5 0 0 0-2.1-1.2H48Z"/>
+    <path d="M0 46h44v5H0zM8 43h5v4H8zm20 0h5v4h-5z"/>
+    <circle cx="13" cy="55" r="7"/>
+    <circle cx="27" cy="55" r="7"/>
+    <circle cx="50" cy="55" r="7"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+    <path d="M8 26h30M8 31h30" opacity=".25"/>
+    <path d="M24 23c-2.5 3.5-4 5.5-4 7.3a4 4 0 0 0 8 0c0-1.8-1.5-3.8-4-7.3Z"/>
+  </g>
+  <g fill="white"><circle cx="13" cy="55" r="3"/><circle cx="27" cy="55" r="3"/><circle cx="50" cy="55" r="3"/></g>
+</svg>
