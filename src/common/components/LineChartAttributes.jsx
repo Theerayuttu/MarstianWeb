@@ -109,7 +109,7 @@ const LineChartAttributes = ({
             height={20}
             stroke={theme.palette.primary.main}
             tickFormatter={() => ''}
-          /> 
+          />
         )}
         <Area
           type={interpola}
