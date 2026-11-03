@@ -693,6 +693,7 @@
     "categoryEvsuv":"EV SUV",
     "categoryEvbus":"EV Bus",
     "categoryEvgarbage":"EV Garbage",
+    "categoryTanktruck":"รถบรรทุกน้ำ",
     "welcomeLoginPage": "ยินดีต้อนรับเข้าสู่",
     "deviceBlockUsageMenu":"บล็อคสตาร์ทเครื่องยนต์",
     "commandBlock":"บล็อค",
