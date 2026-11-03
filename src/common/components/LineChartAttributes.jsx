@@ -103,13 +103,13 @@ const LineChartAttributes = ({
           formatter={(value) => [value, attr]}
           labelFormatter={(value) => formatTime(value, 'time')}
         />
-        {attr === 'ignition' &&
+        {attr === 'ignition' && (
           <Brush
             dataKey={timeType}
             height={20}
             stroke={theme.palette.primary.main}
             tickFormatter={() => ''}
-          /> 
+          /> )
         }
         <Area
           type={interpola}
