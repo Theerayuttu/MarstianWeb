@@ -48,4 +48,5 @@ export default [
   'evtruck',
   'evbus',
   'evgarbage',
+  'tanktruck',
 ];
