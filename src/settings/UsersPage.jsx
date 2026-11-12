@@ -108,8 +108,6 @@ const UsersPage = () => {
         <TableBody>
           {items
             .filter((u) => temporary || !u.temporary)
-            .slice()
-            .sort((a, b) => b.id - a.id)
             .map((item) => (
               <TableRow key={item.id}>
                 <TableCell>{item.id}</TableCell>
