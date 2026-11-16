@@ -14,7 +14,7 @@ import { makeStyles } from 'tss-react/mui';
 import { createRoot } from 'react-dom/client';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import { map } from '../core/MapView';
-import { errorsActions } from '../../store';
+import { messagesActions } from '../../store';
 import { useTranslation } from '../../common/components/LocalizationProvider';
 
 const useStyles = makeStyles()((theme) => ({
@@ -65,7 +65,7 @@ const MapGeocoder = () => {
         setResults(data.features || []);
       } catch (e) {
         if (e.name !== 'AbortError') {
-          dispatch(errorsActions.push(e.message));
+          dispatch(messagesActions.push(e.message));
         }
       } finally {
         setLoading(false);
