@@ -226,6 +226,7 @@ export default (t) =>
       fuelUsed: {
         name: t('positionFuelUsed'),
         type: 'number',
+        dataType: 'volume',
       },
       fuelConsumption: {
         name: t('positionFuelConsumption'),
