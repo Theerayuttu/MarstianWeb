@@ -82,6 +82,9 @@ const SocketController = () => {
   const includeLogsRef = useRef(includeLogs);
   includeLogsRef.current = includeLogs;
 
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+
   const connectSocketRef = useRef();
 
   const connectSocket = useCallback(() => {
@@ -113,7 +116,7 @@ const SocketController = () => {
           dispatch(sessionActions.updatePositions(await positionsResponse.json()));
         }
         if (devicesResponse.status === 401 || positionsResponse.status === 401) {
-          navigate('/login');
+          navigateRef.current('/login');
         }
       } catch {
         // ignore errors
@@ -141,7 +144,7 @@ const SocketController = () => {
         dispatch(sessionActions.updateLogs(data.logs));
       }
     };
-  }, [clearReconnectTimeout, dispatch, navigate]);
+  }, [clearReconnectTimeout, dispatch]);
 
   connectSocketRef.current = connectSocket;
 
