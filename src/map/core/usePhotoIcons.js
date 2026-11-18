@@ -34,6 +34,9 @@ const loadCategory = async (category) => {
   }
 };
 
+// Read-only view of loaded photo categories; loading is driven by the default hook
+export const usePhotoCategories = () => useSyncExternalStore(subscribe, getSnapshot);
+
 // Returns the set of device categories that have a photo icon loaded on the map
 export default () => {
   const categories = useSelector(
@@ -52,5 +55,5 @@ export default () => {
     categories.filter((category) => !requested.has(category)).forEach(loadCategory);
   }, [categories]);
 
-  return useSyncExternalStore(subscribe, getSnapshot);
+  return usePhotoCategories();
 };

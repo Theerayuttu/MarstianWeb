@@ -4,6 +4,7 @@ import {
   IconButton,
   Tooltip,
   Avatar,
+  Badge,
   ListItemAvatar,
   ListItemText,
   ListItemButton,
@@ -16,6 +17,7 @@ import { devicesActions } from '../store';
 import { formatAlarm, formatBoolean, formatStatus } from '../common/util/formatter';
 import { useTranslation } from '../common/components/LocalizationProvider';
 import { mapIconKey, mapIcons } from '../map/core/preloadImages';
+import { usePhotoCategories } from '../map/core/usePhotoIcons';
 import { useAdministrator } from '../common/util/permissions';
 import EngineIcon from '../resources/images/data/engine.svg?react';
 import { useAttributePreference } from '../common/util/preferences';
@@ -32,6 +34,20 @@ const useStyles = makeStyles()((theme) => ({
     width: '25px',
     height: '25px',
     filter: 'brightness(0) invert(1)',
+  },
+  photoAvatar: {
+    backgroundColor: 'transparent',
+  },
+  photo: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+  },
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    border: `2px solid ${theme.palette.background.paper}`,
   },
   batteryText: {
     fontSize: '0.75rem',
@@ -65,6 +81,7 @@ const DeviceRow = ({ devices, index, style }) => {
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
 
   const item = devices[index];
+  const photoCategories = usePhotoCategories();
   const position = useSelector((state) => state.session.positions[item.id]);
 
   const events = useSelector((state) => state.events.items.filter((e) => e.deviceId === item.id));
@@ -159,9 +176,23 @@ const DeviceRow = ({ devices, index, style }) => {
         className={selectedDeviceId === item.id ? classes.selected : null}
       >
         <ListItemAvatar>
-          <Avatar style={{ background: getStatusColorIcon(item) }}>
-            <img className={classes.icon} src={mapIcons[mapIconKey(item.category)]} alt="" />
-          </Avatar>
+          {photoCategories.has(item.category) ? (
+            <Badge
+              variant="dot"
+              overlap="rectangular"
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              classes={{ badge: classes.statusDot }}
+              slotProps={{ badge: { style: { background: getStatusColorIcon(item) } } }}
+            >
+              <Avatar variant="square" className={classes.photoAvatar}>
+                <img className={classes.photo} src={`/images/${item.category}.png`} alt="" />
+              </Avatar>
+            </Badge>
+          ) : (
+            <Avatar style={{ background: getStatusColorIcon(item) }}>
+              <img className={classes.icon} src={mapIcons[mapIconKey(item.category)]} alt="" />
+            </Avatar>
+          )}
         </ListItemAvatar>
         <ListItemText
           primary={primaryValue}
