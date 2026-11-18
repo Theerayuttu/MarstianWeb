@@ -156,7 +156,7 @@ const MapPositions = ({
           source,
           filter: ['!has', 'point_count'],
           paint: {
-            'circle-radius': ['case', ['get', 'photo'], 36 * iconScale, 22 * iconScale],
+            'circle-radius': ['case', ['get', 'photo'], 28 * iconScale, 22 * iconScale],
             'circle-color': 'rgba(33, 150, 243, 0.18)',
             'circle-stroke-color': '#2196f3',
             'circle-stroke-width': 3,
@@ -201,7 +201,7 @@ const MapPositions = ({
         layout: {
           'icon-image': 'direction',
           // Photo icons are wider than the round icon, push the arrow outside them
-          'icon-size': ['case', ['get', 'photo'], 1.4 * iconScale, iconScale],
+          'icon-size': ['case', ['get', 'photo'], 1.2 * iconScale, iconScale],
           'icon-allow-overlap': true,
           'icon-ignore-placement': ignorePlacement,
           'icon-rotate': ['get', 'rotation'],

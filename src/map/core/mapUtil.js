@@ -56,7 +56,7 @@ export const prepareIcon = (background, icon, color) => {
   return context.getImageData(0, 0, canvas.width, canvas.height);
 };
 
-export const preparePhotoIcon = (image, color, width = 64, height = 48) => {
+export const preparePhotoIcon = (image, color, width = 48, height = 48) => {
   const canvas = document.createElement('canvas');
   canvas.width = width * devicePixelRatio;
   canvas.height = height * devicePixelRatio;
