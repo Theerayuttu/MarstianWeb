@@ -45,7 +45,17 @@ const PositionsReportPage = () => {
   const readonly = useRestriction('readonly');
 
   const [available, setAvailable] = useState([]);
-  const [columns, setColumns] = useState(['fixTime', 'latitude', 'longitude', 'speed', 'address']);
+  const [columns, setColumns] = useState([
+    'fixTime',
+    'latitude',
+    'longitude',
+    'ignition',
+    'power',
+    'fuel',
+    'adc2',
+    'speed',
+    'address',
+  ]);
   const [items, setItems] = useState([]);
   const geofenceId = searchParams.has('geofenceId')
     ? parseInt(searchParams.get('geofenceId'))
@@ -100,6 +110,7 @@ const PositionsReportPage = () => {
           [...keyList, ...keySet].map((key) => [key, positionAttributes[key]?.name || key]),
         );
         setItems(data);
+        setSelectedItem(null);
       } finally {
         setLoading(false);
       }

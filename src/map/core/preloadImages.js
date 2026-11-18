@@ -1,6 +1,6 @@
 import { grey } from '@mui/material/colors';
 import { createTheme } from '@mui/material';
-import { loadImage, prepareIcon } from './mapUtil';
+import { loadImage, prepareIcon, preparePhotoIcon } from './mapUtil';
 
 import directionSvg from '../../resources/images/direction.svg';
 import backgroundSvg from '../../resources/images/background.svg';
@@ -152,6 +152,18 @@ const loadImages = async () => {
       await Promise.all(results);
     }),
   );
+};
+
+export const photoIconKey = (category, color) => `photo-${category}-${color}`;
+
+// Uses the same category photos as StatusCard; rejects when the category has no photo
+export const preparePhotoIcons = async (category) => {
+  const photo = await loadImage(`/images/${category}.png`);
+  return ['info', 'success', 'error', 'neutral'].map((color) => {
+    const key = photoIconKey(category, color);
+    mapImages[key] = preparePhotoIcon(photo, theme.palette[color].main);
+    return key;
+  });
 };
 
 let loading = null;
