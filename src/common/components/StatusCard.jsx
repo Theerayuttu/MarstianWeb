@@ -276,10 +276,10 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
               className={classes.card}
               sx={{ borderRadius: 3, overflow: 'visible' }}
             >
-              {device?.category && (
+              {device && (
                 <Box
                   component="img"
-                  src={`/images/${device.category}.png`}
+                  src={`/images/${device.category || 'default'}.png`}
                   className={classes.categoryImage}
                   draggable={false}
                 />
