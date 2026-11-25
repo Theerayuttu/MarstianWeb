@@ -49,4 +49,6 @@ export default [
   'evbus',
   'evgarbage',
   'tanktruck',
+  'diaphragmwall',
+  'truck2',
 ];

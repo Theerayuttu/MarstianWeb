@@ -32,6 +32,7 @@ export default (t) =>
       altitude: {
         name: t('positionAltitude'),
         type: 'number',
+        dataType: 'altitude',
         property: true,
       },
       accuracy: {
@@ -225,6 +226,7 @@ export default (t) =>
       fuelUsed: {
         name: t('positionFuelUsed'),
         type: 'number',
+        dataType: 'volume',
       },
       fuelConsumption: {
         name: t('positionFuelConsumption'),
@@ -394,7 +396,7 @@ export default (t) =>
       speedLimit: {
         name: t('attributeSpeedLimit'),
         type: 'number',
-        subtype: 'speed',
+        dataType: 'speed',
       },
       soc: {
         name: 'SoC',

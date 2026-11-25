@@ -56,6 +56,38 @@ export const prepareIcon = (background, icon, color) => {
   return context.getImageData(0, 0, canvas.width, canvas.height);
 };
 
+export const preparePhotoIcon = (image, color, width = 48, height = 48) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = width * devicePixelRatio;
+  canvas.height = height * devicePixelRatio;
+
+  const context = canvas.getContext('2d');
+  context.imageSmoothingQuality = 'high';
+
+  const scale = Math.min(canvas.width / image.width, canvas.height / image.height);
+  const imageWidth = image.width * scale;
+  const imageHeight = image.height * scale;
+  context.drawImage(
+    image,
+    (canvas.width - imageWidth) / 2,
+    (canvas.height - imageHeight) / 2,
+    imageWidth,
+    imageHeight,
+  );
+
+  const radius = 6 * devicePixelRatio;
+  const stroke = 2 * devicePixelRatio;
+  context.beginPath();
+  context.arc(canvas.width - radius - stroke / 2, radius + stroke / 2, radius, 0, 2 * Math.PI);
+  context.fillStyle = color;
+  context.fill();
+  context.lineWidth = stroke;
+  context.strokeStyle = 'white';
+  context.stroke();
+
+  return context.getImageData(0, 0, canvas.width, canvas.height);
+};
+
 export const reverseCoordinates = (it) => {
   if (!it) {
     return it;

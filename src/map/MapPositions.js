@@ -4,10 +4,11 @@ import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { map } from './core/MapView';
 import { formatTime, getStatusColor } from '../common/util/formatter';
-import { mapIconKey } from './core/preloadImages';
+import { mapIconKey, photoIconKey } from './core/preloadImages';
 import { useAttributePreference } from '../common/util/preferences';
 import { useCatchCallback } from '../reactHelper';
 import { findFonts } from './core/mapUtil';
+import usePhotoIcons from './core/usePhotoIcons';
 
 const MapPositions = ({
   positions,
@@ -28,6 +29,7 @@ const MapPositions = ({
 
   const devices = useSelector((state) => state.devices.items);
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
+  const photoIcons = usePhotoIcons();
 
   const mapCluster = useAttributePreference('mapCluster', true);
   const directionType = useAttributePreference('mapDirection', 'selected');
@@ -60,25 +62,29 @@ const MapPositions = ({
           showDirection = selectedPositionId === position.id && position.course > 0;
           break;
       }
+      const color = showStatus
+        ? iconColor(
+            device.status,
+            position.attributes.color || getStatusColor(device.status),
+            position.attributes.ignition,
+          )
+        : 'neutral';
+      const photo = photoIcons.has(device.category);
       return {
         id: position.id,
         deviceId: position.deviceId,
         name: device.name,
         fixTime: formatTime(position.fixTime, 'seconds'),
-        category: mapIconKey(device.category),
-        color: showStatus
-          ? iconColor(
-              device.status,
-              position.attributes.color || getStatusColor(device.status),
-              position.attributes.ignition,
-            )
-          : 'neutral',
+        image: photo
+          ? photoIconKey(device.category, color)
+          : `${mapIconKey(device.category)}-${color}`,
+        photo,
         rotation: position.course,
         direction: showDirection,
       };
     },
     // eslint-disable-next-line @eslint-react/exhaustive-deps -- iconColor only closes over showStatus, already listed
-    [directionType, showStatus],
+    [directionType, showStatus, photoIcons],
   );
 
   const onMouseEnter = () => (map.getCanvas().style.cursor = 'pointer');
@@ -141,6 +147,8 @@ const MapPositions = ({
       },
     });
     [id, selected].forEach((source) => {
+      // The selected device is drawn above clusters, so it must not hide them by collision
+      const ignorePlacement = source === selected;
       if (source === selected) {
         map.addLayer({
           id: `plusRing-${source}`,
@@ -148,7 +156,7 @@ const MapPositions = ({
           source,
           filter: ['!has', 'point_count'],
           paint: {
-            'circle-radius': 22 * iconScale,
+            'circle-radius': ['case', ['get', 'photo'], 28 * iconScale, 22 * iconScale],
             'circle-color': 'rgba(33, 150, 243, 0.18)',
             'circle-stroke-color': '#2196f3',
             'circle-stroke-width': 3,
@@ -162,13 +170,20 @@ const MapPositions = ({
         source,
         filter: ['!has', 'point_count'],
         layout: {
-          'icon-image': '{category}-{color}',
+          'icon-image': '{image}',
           'icon-size': iconScale,
           'icon-allow-overlap': true,
+          'icon-ignore-placement': ignorePlacement,
           'text-field': `{${titleField || 'name'}}`,
           'text-allow-overlap': true,
+          'text-ignore-placement': ignorePlacement,
           'text-anchor': 'bottom',
-          'text-offset': [0, -2 * iconScale],
+          'text-offset': [
+            'case',
+            ['get', 'photo'],
+            ['literal', [0, -2.4 * iconScale]],
+            ['literal', [0, -2 * iconScale]],
+          ],
           'text-font': findFonts(map),
           'text-size': 12,
           'symbol-sort-key': ['get', 'id'],
@@ -185,8 +200,10 @@ const MapPositions = ({
         filter: ['all', ['!has', 'point_count'], ['==', 'direction', true]],
         layout: {
           'icon-image': 'direction',
-          'icon-size': iconScale,
+          // Photo icons are wider than the round icon, push the arrow outside them
+          'icon-size': ['case', ['get', 'photo'], 1.2 * iconScale, iconScale],
           'icon-allow-overlap': true,
+          'icon-ignore-placement': ignorePlacement,
           'icon-rotate': ['get', 'rotation'],
           'icon-rotation-alignment': 'map',
         },
@@ -196,19 +213,23 @@ const MapPositions = ({
       map.on('mouseleave', source, onMouseLeave);
       map.on('click', source, onMarkerClickCallback);
     });
-    map.addLayer({
-      id: clusters,
-      type: 'symbol',
-      source: id,
-      filter: ['has', 'point_count'],
-      layout: {
-        'icon-image': 'background',
-        'icon-size': iconScale,
-        'text-field': '{point_count_abbreviated}',
-        'text-font': findFonts(map),
-        'text-size': 14,
+    map.addLayer(
+      {
+        id: clusters,
+        type: 'symbol',
+        source: id,
+        filter: ['has', 'point_count'],
+        layout: {
+          'icon-image': 'background',
+          'icon-size': iconScale,
+          'text-field': '{point_count_abbreviated}',
+          'text-font': findFonts(map),
+          'text-size': 14,
+        },
       },
-    });
+      // Keep clusters below the selected device layers
+      `plusRing-${selected}`,
+    );
 
     map.on('mouseenter', clusters, onMouseEnter);
     map.on('mouseleave', clusters, onMouseLeave);

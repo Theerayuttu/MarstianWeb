@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Snackbar } from '@mui/material';
-import { devicesActions, sessionActions } from './store';
+import { devicesActions, messagesActions, sessionActions } from './store';
 import { useCatchCallback, useAsyncTask } from './reactHelper';
 import { snackBarDurationLongMs } from './common/util/duration';
 import alarm from './resources/alarm.mp3';
@@ -43,8 +42,6 @@ const SocketController = () => {
     }
   }, []);
 
-  const [notifications, setNotifications] = useState([]);
-
   const soundEvents = useAttributePreference('soundEvents', '');
   const soundAlarms = useAttributePreference('soundAlarms', 'sos');
 
@@ -64,13 +61,17 @@ const SocketController = () => {
       ) {
         playAlarm();
       }
-      setNotifications(
-        events.map((event) => ({
-          id: event.id,
-          message: event.attributes.message,
-          show: true,
-        })),
-      );
+      events.forEach((event) => {
+        if (event.attributes.message) {
+          dispatch(
+            messagesActions.push({
+              message: event.attributes.message,
+              severity: 'info',
+              duration: snackBarDurationLongMs,
+            }),
+          );
+        }
+      });
     },
     [features, dispatch, soundEvents, soundAlarms],
   );
@@ -81,6 +82,9 @@ const SocketController = () => {
   const includeLogsRef = useRef(includeLogs);
   includeLogsRef.current = includeLogs;
 
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+
   const connectSocketRef = useRef();
 
   const connectSocket = useCallback(() => {
@@ -88,8 +92,9 @@ const SocketController = () => {
     if (socketRef.current && socketRef.current.readyState !== WebSocket.CLOSED) {
       socketRef.current.close();
     }
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const socket = new WebSocket(`${protocol}//${window.location.host}/api/socket`);
+    const url = new URL('api/socket', document.baseURI);
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(url);
     socketRef.current = socket;
 
     socket.onopen = () => {
@@ -112,7 +117,7 @@ const SocketController = () => {
           dispatch(sessionActions.updatePositions(await positionsResponse.json()));
         }
         if (devicesResponse.status === 401 || positionsResponse.status === 401) {
-          navigate('/login');
+          navigateRef.current('/login');
         }
       } catch {
         // ignore errors
@@ -140,7 +145,7 @@ const SocketController = () => {
         dispatch(sessionActions.updateLogs(data.logs));
       }
     };
-  }, [clearReconnectTimeout, dispatch, navigate]);
+  }, [clearReconnectTimeout, dispatch]);
 
   connectSocketRef.current = connectSocket;
 
@@ -217,19 +222,7 @@ const SocketController = () => {
     };
   }, [authenticated, connectSocket]);
 
-  return (
-    <>
-      {notifications.map((notification) => (
-        <Snackbar
-          key={notification.id}
-          open={notification.show}
-          message={notification.message}
-          autoHideDuration={snackBarDurationLongMs}
-          onClose={() => setNotifications((prev) => prev.filter((e) => e.id !== notification.id))}
-        />
-      ))}
-    </>
-  );
+  return null;
 };
 
 export default SocketController;
